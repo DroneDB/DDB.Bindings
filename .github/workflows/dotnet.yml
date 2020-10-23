@@ -15,7 +15,7 @@ jobs:
           with:
             path: bindings
         - name: Build .NET bindings
-          run:
+          run: |
             cd bindings
             dotnet build -c Release
             dir
