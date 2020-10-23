@@ -13,12 +13,12 @@ jobs:
         steps:
             - uses: actions/checkout@v2
               with:
-                  path: bindings
+                path: bindings
             - uses: actions/checkout@v2
               with:
-                  repository: DroneDB/DroneDB
-                  submodules: "recursive"
-                  path: ddb
+                repository: DroneDB/DroneDB
+                submodules: "recursive"
+                path: ddb
             - name: Cache Build
               id: cache-build
               uses: actions/cache@v2
@@ -58,26 +58,26 @@ jobs:
             - name: Upload Library Files
               uses: actions/upload-artifact@v2
               with:
-                    name: .NET Bindings
-                    path: bindings\DDB.Bindings\bin\Release\*.*
+                name: .NET Bindings
+                path: bindings\DDB.Bindings\bin\Release\*.*
     build_dotnet_linux:
         name: Build Linux .NET Bindings
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
               with:
-                    repository: DroneDB/DroneDB
-                    submodules: "recursive"
-                    path: ddb
+                repository: DroneDB/DroneDB
+                submodules: "recursive"
+                path: ddb
             - uses: actions/checkout@v2
               with:
-                  path: bindings   
+                path: bindings   
             - name: Cache Build
               id: cache-build
               uses: actions/cache@v2
               with:
-              path: ${{ github.workspace }}/ddb/build
-              key: ${{ runner.os }}-build         
+                path: ${{ github.workspace }}/ddb/build
+                key: ${{ runner.os }}-build         
             - name: Build .NET bindings
               run: |
                     cd bindings
