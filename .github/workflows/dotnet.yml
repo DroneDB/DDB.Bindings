@@ -21,6 +21,13 @@ jobs:
           submodules: "recursive"
           path: ddb
 
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v2
+        with:
+          path: ddb\build
+          key: ${{ runner.os }}-build
+
       - name: Build .NET bindings
         run: |
           cd bindings
@@ -80,7 +87,7 @@ jobs:
         id: cache-build
         uses: actions/cache@v2
         with:
-          path: ${{ github.workspace }}/ddb/build
+          path: ddb/build
           key: ${{ runner.os }}-build
 
       - name: Build .NET bindings
