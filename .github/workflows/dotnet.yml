@@ -46,8 +46,8 @@ jobs:
             - name: Upload Library Files
               uses: actions/upload-artifact@v2
               with:
-                  name: .NET Bindings
-                  path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+                    name: .NET Bindings
+                    path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
     build_dotnet_linux:
         name: Build Linux .NET Bindings
         runs-on: ubuntu-latest
@@ -56,17 +56,17 @@ jobs:
               with:
                   path: bindings            
             - name: Build .NET bindings
-                run: |
+              run: |
                     cd bindings
                     dotnet build -c Release
                     dir    
             - uses: actions/checkout@v2
-                with:
+              with:
                     repository: DroneDB/DroneDB
                     submodules: "recursive"
                     path: ddb
             - name: Build C++ lib
-                run: |
+              run: |
                     cd ddb
                     scripts/ubuntu_deps.sh
                     mkdir build
@@ -78,18 +78,18 @@ jobs:
                     dir
                     cp -R . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\
             - name: Test .NET bindings
-                run: |
+              run: |
                     export PROJ_LIB=$GITHUB_WORKSPACE/build            
                     cd bindings            
                     dotnet test -c Release
             - name: Publish .NET bindings
-                run: |
+              run: |
                     cd bindings
                     dotnet publish -c Release
                     dir
             - name: Upload Library Files
-                uses: actions/upload-artifact@v2
-                with:
-                    name: .NET Bindings
-                    path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+              uses: actions/upload-artifact@v2
+              with:
+                name: .NET Bindings
+                path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
 
