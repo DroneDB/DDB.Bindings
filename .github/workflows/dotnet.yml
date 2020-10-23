@@ -16,7 +16,7 @@ jobs:
             path: bindings
         - uses: actions/checkout@v2
           with:
-            repository: https://github.com/DroneDB/DroneDB.git
+            repository: DroneDB/DroneDB
             submodules: 'recursive'
             path: ddb
         - name: Build C++ lib
