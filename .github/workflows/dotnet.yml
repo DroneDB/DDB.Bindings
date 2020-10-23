@@ -36,7 +36,7 @@ jobs:
       - name: Build C++ lib
         run: |
           cd ddb
-          mkdir build 2>NUL
+          if (!(Test-Path build -PathType Container)) { New-Item -ItemType Directory -Force -Path build }
           cd build
           cmake .. -DBUILD_TESTING=OFF
           cmake --build . --config Release --target ddb -- /maxcpucount:14
