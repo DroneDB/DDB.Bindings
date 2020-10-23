@@ -36,7 +36,7 @@ jobs:
       - name: Build C++ lib
         run: |
           cd ddb
-          mkdir build
+          if not exist build mkdir build
           cd build
           cmake .. -DBUILD_TESTING=OFF
           cmake --build . --config Release --target ddb -- /maxcpucount:14
