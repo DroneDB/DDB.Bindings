@@ -53,7 +53,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                     name: .NET Bindings
-                    path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+                    path: bindings\DDB.Bindings\bin\Release\*.*
     build_dotnet_linux:
         name: Build Linux .NET Bindings
         runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
                 key: ${{ runner.os }}-build
             - name: Test .NET bindings
               run: |
-                    export PROJ_LIB=$GITHUB_WORKSPACE/build            
+                    export PROJ_LIB=$GITHUB_WORKSPACE/ddb/build            
                     cd bindings
                     dotnet test -c Release
             - name: Publish .NET bindings
@@ -103,5 +103,5 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                 name: .NET Bindings
-                path: bindings/DDB.Bindings/bin/Release/netcoreapp3.1/*.*
+                path: bindings/DDB.Bindings/bin/Release/*.*
 
