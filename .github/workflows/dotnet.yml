@@ -8,44 +8,88 @@ on:
 
 jobs:
     build_dotnet_windows:
-      name: Build Windows .NET Bindings
-      runs-on: windows-latest
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            path: bindings
-        - name: Build .NET bindings
-          run: |
-            cd bindings
-            dotnet build -c Release
-            dir
-        - uses: actions/checkout@v2
-          with:
-            repository: DroneDB/DroneDB
-            submodules: 'recursive'
-            path: ddb
-        - name: Build C++ lib
-          run: |
-            cd ddb
-            mkdir build
-            cd build
-            cmake .. -DBUILD_TESTING=OFF
-            cmake --build . --config Release --target ddb -- /maxcpucount:14
-            dir
-            xcopy . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\ /s /e /y
-        - name: Test .NET bindings
-          run: |            
-            $env:PROJ_LIB = "$env:GITHUB_WORKSPACE\ddb\build"            
-            cd bindings
-            dotnet test -c Release
-        - name: Publish .NET bindings
-          run: |
-            cd bindings
-            dotnet publish -c Release
-            dir
-        - name: Upload Library Files
-          uses: actions/upload-artifact@v2
-          with:
-            name: .NET Bindings
-            path: bindings\DDB.Tests\bin\Release\netcoreapp3.1\*.*
-    
+        name: Build Windows .NET Bindings
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  path: bindings
+            - name: Build .NET bindings
+              run: |
+                  cd bindings
+                  dotnet build -c Release
+                  dir
+            - uses: actions/checkout@v2
+              with:
+                  repository: DroneDB/DroneDB
+                  submodules: "recursive"
+                  path: ddb
+            - name: Build C++ lib
+              run: |
+                  cd ddb
+                  mkdir build
+                  cd build
+                  cmake .. -DBUILD_TESTING=OFF
+                  cmake --build . --config Release --target ddb -- /maxcpucount:14
+                  dir
+                  xcopy . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\ /s /e /y
+            - name: Test .NET bindings
+              run: |
+                  $env:PROJ_LIB = "$env:GITHUB_WORKSPACE\ddb\build"            
+                  cd bindings
+                  dotnet test -c Release
+            - name: Publish .NET bindings
+              run: |
+                  cd bindings
+                  dotnet publish -c Release
+                  dir
+            - name: Upload Library Files
+              uses: actions/upload-artifact@v2
+              with:
+                  name: .NET Bindings
+                  path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+    build_dotnet_linux:
+        name: Build Linux .NET Bindings
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  path: bindings            
+            - name: Build .NET bindings
+                run: |
+                    cd bindings
+                    dotnet build -c Release
+                    dir    
+            - uses: actions/checkout@v2
+                with:
+                    repository: DroneDB/DroneDB
+                    submodules: "recursive"
+                    path: ddb
+            - name: Build C++ lib
+                run: |
+                    cd ddb
+                    scripts/ubuntu_deps.sh
+                    mkdir build
+                    cd build
+                    cmake -DBUILD_TESTING=OFF ..
+                    make -j$(nproc) ddb
+                    sudo make install
+                    sudo ldconfig
+                    dir
+                    cp -R . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\
+            - name: Test .NET bindings
+                run: |
+                    export PROJ_LIB=$GITHUB_WORKSPACE/build            
+                    cd bindings            
+                    dotnet test -c Release
+            - name: Publish .NET bindings
+                run: |
+                    cd bindings
+                    dotnet publish -c Release
+                    dir
+            - name: Upload Library Files
+                uses: actions/upload-artifact@v2
+                with:
+                    name: .NET Bindings
+                    path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+
