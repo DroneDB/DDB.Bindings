@@ -22,7 +22,6 @@ jobs:
           path: ddb
 
       - name: Cache Build
-        id: cache-build
         uses: actions/cache@v2
         with:
           path: ddb\build
@@ -84,7 +83,6 @@ jobs:
           path: bindings
 
       - name: Cache Build
-        id: cache-build
         uses: actions/cache@v2
         with:
           path: ddb/build
