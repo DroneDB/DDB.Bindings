@@ -59,7 +59,7 @@ jobs:
               run: |
                     cd bindings
                     dotnet build -c Release
-                    dir    
+                    ls -l    
             - uses: actions/checkout@v2
               with:
                     repository: DroneDB/DroneDB
@@ -75,18 +75,18 @@ jobs:
                     make -j$(nproc) ddb
                     sudo make install
                     sudo ldconfig
-                    dir
-                    cp -R . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\
+                    ls -l
+                    rsync -a . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\
             - name: Test .NET bindings
               run: |
                     export PROJ_LIB=$GITHUB_WORKSPACE/build            
-                    cd bindings            
+                    cd bindings
                     dotnet test -c Release
             - name: Publish .NET bindings
               run: |
                     cd bindings
                     dotnet publish -c Release
-                    dir
+                    ls -l
             - name: Upload Library Files
               uses: actions/upload-artifact@v2
               with:
