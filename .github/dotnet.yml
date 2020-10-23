@@ -1,0 +1,46 @@
+name: .NET CI
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+        branches: [master]
+
+jobs:
+    build_dotnet_windows:
+      name: Build Windows .NET Bindings
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            path: bindings
+        - uses: actions/checkout@v2
+          with:
+            repository: https://github.com/DroneDB/DroneDB.git
+            submodules: 'recursive'
+            path: ddb
+        - name: Build C++ lib
+          run: |
+            cd ddb
+            mkdir build
+            cd build
+            cmake .. -DBUILD_TESTING=OFF
+            cmake --build . --config Release --target ddb -- /maxcpucount:14
+            dir
+        - name: Test .NET bindings
+          run: |            
+            $env:PROJ_LIB = "$env:GITHUB_WORKSPACE\ddb\build"
+            $env:Path += "$env:GITHUB_WORKSPACE\ddb\build"
+            cd bindings
+            dotnet test -c Release
+        - name: Publish .NET bindings
+          run: |
+            cd bindings
+            dotnet publish -c Release
+            dir
+        - name: Upload Library Files
+          uses: actions/upload-artifact@v2
+          with:
+            name: .NET Bindings
+            path: bindings\DDB.Tests\bin\Release\netcoreapp3.1\*.*
+    
