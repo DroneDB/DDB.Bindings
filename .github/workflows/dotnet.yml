@@ -33,6 +33,12 @@ jobs:
                   cmake --build . --config Release --target ddb -- /maxcpucount:14
                   dir
                   xcopy . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\ /s /e /y
+            - name: Cache Build
+              id: cache-build
+              uses: actions/cache@v2
+              with:
+                path: ddb\build
+                key: ${{ runner.os }}-build
             - name: Test .NET bindings
               run: |
                   $env:PROJ_LIB = "$env:GITHUB_WORKSPACE\ddb\build"            
@@ -77,6 +83,12 @@ jobs:
                     sudo ldconfig
                     ls -l
                     rsync -a . ../../bindings/DDB.Tests/bin/Release/netcoreapp3.1/
+            - name: Cache Build
+              id: cache-build
+              uses: actions/cache@v2
+              with:
+                path: ddb/build
+                key: ${{ runner.os }}-build
             - name: Test .NET bindings
               run: |
                     export PROJ_LIB=$GITHUB_WORKSPACE/build            
