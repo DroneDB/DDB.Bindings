@@ -76,7 +76,7 @@ jobs:
                     sudo make install
                     sudo ldconfig
                     ls -l
-                    rsync -a . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\
+                    rsync -a . ../../bindings/DDB.Tests/bin/Release/netcoreapp3.1/
             - name: Test .NET bindings
               run: |
                     export PROJ_LIB=$GITHUB_WORKSPACE/build            
@@ -91,5 +91,5 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                 name: .NET Bindings
-                path: bindings\DDB.Bindings\bin\Release\netcoreapp3.1\*.*
+                path: bindings/DDB.Bindings/bin/Release/netcoreapp3.1/*.*
 
