@@ -36,7 +36,7 @@ jobs:
       - name: Build C++ lib
         run: |
           cd ddb
-          if not exist build mkdir build
+          mkdir build 2>NUL
           cd build
           cmake .. -DBUILD_TESTING=OFF
           cmake --build . --config Release --target ddb -- /maxcpucount:14
@@ -98,7 +98,7 @@ jobs:
         run: |
           cd ddb
           scripts/ubuntu_deps.sh
-          mkdir build
+          mkdir -p build
           cd build
           cmake -DBUILD_TESTING=OFF ..
           make -j$(nproc) ddb
