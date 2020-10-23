@@ -23,8 +23,8 @@ jobs:
               id: cache-build
               uses: actions/cache@v2
               with:
-              path: ${{ github.workspace }}\ddb\build
-              key: ${{ runner.os }}-build
+                path: ${{ github.workspace }}\ddb\build
+                key: ${{ runner.os }}-build
             - name: Build .NET bindings
               run: |
                   cd bindings
