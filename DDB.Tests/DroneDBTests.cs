@@ -359,6 +359,29 @@ namespace DDB.Tests
             Assert.IsTrue(e.ModifiedTime.Year == 1970);
         }
 
+
+
+        [Test]
+        public void Password_HappyPath_Ok()
+        {
+
+            using var test = new TestFS(Test1ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, "public", "default");
+
+            DroneDB.VerifyPassword(ddbPath, string.Empty).Should().BeTrue();
+
+            DroneDB.AppendPassword(ddbPath, "testpassword");
+
+            DroneDB.VerifyPassword(ddbPath, "testpassword").Should().BeTrue();
+            DroneDB.VerifyPassword(ddbPath, "wrongpassword").Should().BeFalse();
+
+            DroneDB.ClearPasswords(ddbPath);
+            DroneDB.VerifyPassword(ddbPath, "testpassword").Should().BeFalse();
+
+
+        }
+
         [Test]
         [Explicit("Clean test directory")]
         public void Clean_Domain()

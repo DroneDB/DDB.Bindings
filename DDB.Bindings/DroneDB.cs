@@ -54,7 +54,7 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBAdd")]
-        static extern DDBError _Add([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
+        private static extern DDBError _Add([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
                                   [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] paths,
                                   int numPaths, out IntPtr output, bool recursive);
 
@@ -86,7 +86,7 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBRemove")]
-        static extern DDBError _Remove([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
+        private static extern DDBError _Remove([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
                                   [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] paths,
                                   int numPaths);
 
@@ -108,7 +108,7 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBInfo")]
-        static extern DDBError _Info([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] paths,
+        private static extern DDBError _Info([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] paths,
                                    int numPaths,
                                    out IntPtr output,
                                    [MarshalAs(UnmanagedType.LPStr)] string format, bool recursive = false,
@@ -143,7 +143,7 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBList")]
-        static extern DDBError _List([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
+        private static extern DDBError _List([MarshalAs(UnmanagedType.LPStr)] string ddbPath,
                                     [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] paths,
                                     int numPaths,
                                     out IntPtr output,
@@ -170,6 +170,69 @@ namespace DDB.Bindings
                     throw new DDBException("Unable get list");
 
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBAppendPassword")]
+        private static extern DDBError _AppendPassword(
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath, 
+            [MarshalAs(UnmanagedType.LPStr)] string password);
+
+        public static void AppendPassword(string ddbPath, string password)
+        {
+            try
+            {
+
+                if (_AppendPassword(ddbPath, password) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+                
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBVerifyPassword")]
+        static extern DDBError _VerifyPassword(
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath,
+            [MarshalAs(UnmanagedType.LPStr)] string password,
+            out bool verified);
+
+        public static bool VerifyPassword(string ddbPath, string password)
+        {
+            try
+            {
+
+                if (_VerifyPassword(ddbPath, password, out var res) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBClearPasswords")]
+        static extern DDBError _ClearPasswords (
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath);
+
+        public static void ClearPasswords(string ddbPath)
+        {
+            try
+            {
+
+                if (_ClearPasswords(ddbPath) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
             }
             catch (Exception ex)
