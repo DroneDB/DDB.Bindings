@@ -158,7 +158,7 @@ namespace DDB.Tests
             res.Count.Should().Be(1);
 
         }
-        
+
         [Test]
         public void Info_ImageFile_Details()
         {
@@ -177,7 +177,7 @@ namespace DDB.Tests
 
             // Just check some fields
             //info.Meta.Should().BeEquivalentTo(expectedMeta);
-            
+
             info.Meta.Should().NotBeEmpty();
             info.Meta.Should().HaveCount(14);
             info.Meta["make"].Should().Be("DJI");
@@ -414,6 +414,20 @@ namespace DDB.Tests
             Action act = () => DroneDB.ChangeAttributes(ddbPath, null);
 
             act.Should().Throw<ArgumentException>();
+
+        }
+
+        [Test]
+        public void GenerateThumbnail_HappyPath_Ok()
+        {
+
+            using var tempFile = new TempFile(TestFileUrl, BaseTestFolder);
+
+            var destPath = Path.GetTempFileName();
+
+            File.Delete(destPath);
+
+            DroneDB.GenerateThumbnail(tempFile.FilePath, 300, destPath);
 
         }
 
