@@ -241,5 +241,34 @@ namespace DDB.Bindings
             }
 
         }
+
+        [DllImport("ddb", EntryPoint = "DDBChattr")]
+        static extern DDBError _ChangeAttributes(
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath, string attributesJson, out IntPtr jsonOutput);
+
+        public static Dictionary<string, object> ChangeAttributes(string ddbPath, Dictionary<string, object> attributes)
+        {
+            try
+            {
+
+                var attrs = JsonConvert.SerializeObject(attributes);
+
+                if (_ChangeAttributes(ddbPath, attrs, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+
+                if (string.IsNullOrWhiteSpace(json))
+                    throw new DDBException("Unable get attributes");
+
+                return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
     }
 }
