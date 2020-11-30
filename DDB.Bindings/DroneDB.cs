@@ -248,6 +248,10 @@ namespace DDB.Bindings
 
         public static Dictionary<string, object> ChangeAttributes(string ddbPath, Dictionary<string, object> attributes)
         {
+
+            if (attributes == null)
+                throw new ArgumentException("Attributes is null");
+
             try
             {
 
@@ -256,12 +260,12 @@ namespace DDB.Bindings
                 if (_ChangeAttributes(ddbPath, attrs, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
-                var json = Marshal.PtrToStringAnsi(output);
+                var res = Marshal.PtrToStringAnsi(output);
 
-                if (string.IsNullOrWhiteSpace(json))
+                if (string.IsNullOrWhiteSpace(res))
                     throw new DDBException("Unable get attributes");
 
-                return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                return JsonConvert.DeserializeObject<Dictionary<string, object>>(res);
 
             }
             catch (Exception ex)
@@ -271,4 +275,5 @@ namespace DDB.Bindings
 
         }
     }
+
 }
