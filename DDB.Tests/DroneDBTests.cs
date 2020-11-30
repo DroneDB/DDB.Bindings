@@ -20,6 +20,7 @@ namespace DDB.Tests
         private const string TestFileUrl =
             "https://github.com/DroneDB/test_data/raw/master/test-datasets/drone_dataset_brighton_beach/DJI_0023.JPG";
         private const string Test1ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/registry/DdbFactoryTest/testdb1.zip";
+        private const string Test3ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/ddb-test/Test3.zip";
 
         [SetUp]
         public void Setup()
@@ -379,6 +380,40 @@ namespace DDB.Tests
             DroneDB.ClearPasswords(ddbPath);
             DroneDB.VerifyPassword(ddbPath, "testpassword").Should().BeFalse();
 
+
+        }
+
+        // Test3ArchiveUrl
+
+        [Test]
+        public void Chaddr_HappyPath_Ok()
+        {
+
+            using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = test.TestFolder;
+
+            var res = DroneDB.ChangeAttributes(ddbPath, new Dictionary<string, object> { { "public", true } });
+
+            res["public"].Should().Be(true);
+
+            res = DroneDB.ChangeAttributes(ddbPath, new Dictionary<string, object> { { "public", false } });
+
+            res["public"].Should().Be(false);
+
+        }
+
+        [Test]
+        public void Chaddr_NullAttr_Exception()
+        {
+
+            using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = test.TestFolder;
+
+            Action act = () => DroneDB.ChangeAttributes(ddbPath, null);
+
+            act.Should().Throw<ArgumentException>();
 
         }
 
