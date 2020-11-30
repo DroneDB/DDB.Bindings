@@ -423,12 +423,21 @@ namespace DDB.Tests
 
             using var tempFile = new TempFile(TestFileUrl, BaseTestFolder);
 
-            var destPath = Path.GetTempFileName();
+            var destPath = Path.Combine(Path.GetTempPath(), "test.jpg");//Path.GetTempFileName();
 
-            File.Delete(destPath);
+            try
+            {
+                DroneDB.GenerateThumbnail(tempFile.FilePath, 300, destPath);
 
-            DroneDB.GenerateThumbnail(tempFile.FilePath, 300, destPath);
+                var info = new FileInfo(destPath);
+                info.Exists.Should().BeTrue();
+                info.Length.Should().BeGreaterThan(0);
 
+            }
+            finally
+            {
+                if (File.Exists(destPath)) File.Delete(destPath);
+            }
         }
 
         [Test]
