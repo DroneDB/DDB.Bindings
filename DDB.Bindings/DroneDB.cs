@@ -241,5 +241,72 @@ namespace DDB.Bindings
             }
 
         }
+
+        [DllImport("ddb", EntryPoint = "DDBChattr")]
+        static extern DDBError _ChangeAttributes(
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string attributesJson, out IntPtr jsonOutput);
+
+        public static Dictionary<string, object> ChangeAttributes(string ddbPath, Dictionary<string, object> attributes)
+        {
+
+            if (attributes == null)
+                throw new ArgumentException("Attributes is null");
+
+            try
+            {
+
+                var attrs = JsonConvert.SerializeObject(attributes);
+
+                if (_ChangeAttributes(ddbPath, attrs, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var res = Marshal.PtrToStringAnsi(output);
+
+                if (string.IsNullOrWhiteSpace(res))
+                    throw new DDBException("Unable get attributes");
+
+                return JsonConvert.DeserializeObject<Dictionary<string, object>>(res);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        public static Dictionary<string, object> GetAttributes(string ddbPath)
+        {
+            return ChangeAttributes(ddbPath, null);
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBGenerateThumbnail")]
+        static extern DDBError _GenerateThumbnail(
+            [MarshalAs(UnmanagedType.LPStr)] string filePath, int size, [MarshalAs(UnmanagedType.LPStr)] string destPath);
+
+        public static void GenerateThumbnail(string filePath, int size, string destPath)
+        {
+
+            if (filePath == null)
+                throw new ArgumentException("filePath is null");
+
+            if (destPath == null)
+                throw new ArgumentException("destPath is null");
+
+            try
+            {
+
+                if (_GenerateThumbnail(filePath, size, destPath) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+                
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
     }
+
 }
