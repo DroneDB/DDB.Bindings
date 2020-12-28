@@ -221,7 +221,7 @@ namespace DDB.Tests
             const int expectedType = 3;
             const string expectedHash = "f27ddc96daf9aeff3c026de8292681296c3e9d952b647235878c50f2b7b39e94";
             var expectedModifiedTime = new DateTime(2020, 06, 10, 14, 44, 36);
-            var expectedMeta = JsonConvert.DeserializeObject<Dictionary<string, string>>(
+            var expectedMeta = JsonConvert.DeserializeObject<Dictionary<string, object>>(
                 "{\"captureTime\":1591800276004.8,\"focalLength\":4.16,\"focalLength35\":26.0,\"height\":3024,\"make\":\"samsung\",\"model\":\"SM-G950F\",\"orientation\":1,\"sensor\":\"samsung sm-g950f\",\"sensorHeight\":4.32,\"sensorWidth\":5.76,\"width\":4032}");
             //const double expectedLatitude = 45.50027;
             //const double expectedLongitude = 10.60667;
@@ -391,7 +391,7 @@ namespace DDB.Tests
 
             using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
 
-            var ddbPath = test.TestFolder;
+            var ddbPath = Path.Combine(test.TestFolder);
 
             var res = DroneDB.ChangeAttributes(ddbPath, new Dictionary<string, object> { { "public", true } });
 
@@ -445,6 +445,7 @@ namespace DDB.Tests
         public void Clean_Domain()
         {
             TempFile.CleanDomain(BaseTestFolder);
+            TestFS.ClearCache(BaseTestFolder);
         }
     }
 }
