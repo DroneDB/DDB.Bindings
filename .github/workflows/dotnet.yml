@@ -41,7 +41,7 @@ jobs:
           cmake .. -DBUILD_TESTING=OFF
           cmake --build . --config Release --target ddb -- /maxcpucount:14
           dir
-          xcopy . ..\..\bindings\DDB.Tests\bin\Release\netcoreapp3.1\ /s /e /y
+          xcopy . ..\..\bindings\DDB.Tests\bin\Release\net5.0\ /s /e /y
 
       - name: Cache Build
         id: cache-build
@@ -105,7 +105,7 @@ jobs:
           sudo make install
           sudo ldconfig
           ls -l
-          rsync -a . ../../bindings/DDB.Tests/bin/Release/netcoreapp3.1/
+          rsync -a . ../../bindings/DDB.Tests/bin/Release/net5.0/
 
       - name: Test .NET bindings
         run: |

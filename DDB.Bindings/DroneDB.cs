@@ -277,7 +277,7 @@ namespace DDB.Bindings
 
         public static Dictionary<string, object> GetAttributes(string ddbPath)
         {
-            return ChangeAttributes(ddbPath, null);
+            return ChangeAttributes(ddbPath, new Dictionary<string, object>());
         }
 
         [DllImport("ddb", EntryPoint = "DDBGenerateThumbnail")]

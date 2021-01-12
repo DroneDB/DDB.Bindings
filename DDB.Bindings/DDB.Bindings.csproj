@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Authors>DroneDB</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>false</SignAssembly>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <Description>DroneDB native bindings</Description>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
-    <Version>1.0.8</Version>
-    <RepositoryUrl>https://github.com/DroneDB/DroneDB</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/DroneDB/DroneDB</PackageProjectUrl>
+    <AssemblyVersion>1.0.10.0</AssemblyVersion>
+    <FileVersion>1.0.10.0</FileVersion>
+    <Version>1.0.10</Version>
+    <RepositoryUrl>https://github.com/DroneDB/DDB.Bindings</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/DroneDB/DDB.Bindings</PackageProjectUrl>
   </PropertyGroup>
   
   <ItemGroup>

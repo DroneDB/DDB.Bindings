@@ -52,10 +52,11 @@ namespace DDB.Tests
                 Debug.WriteLine($"Archive path is an url");
 
                 var client = new WebClient();
-                var tempPath = Path.Combine(Path.GetTempPath(), uri.Segments.Last());
+                var tempPath = Path.Combine(Path.GetTempPath(), BaseTestFolder, uri.Segments.Last());
 
                 if (File.Exists(tempPath))
                 {
+
                     Debug.WriteLine("No need to download, using cached one");
                 }
                 else
@@ -103,5 +104,11 @@ namespace DDB.Tests
                    !path.StartsWith("http://") && (!path.StartsWith("https://") && !path.StartsWith("ftp://"));
         }
 
+        public static void ClearCache(string baseTestFolder)
+        {
+            var folder = Path.Combine(Path.GetTempPath(), baseTestFolder);
+            if (Directory.Exists(folder))
+                Directory.Delete(folder, true);
+        }
     }
 }
