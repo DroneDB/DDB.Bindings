@@ -307,6 +307,38 @@ namespace DDB.Bindings
 
         }
 
+        [DllImport("ddb", EntryPoint = "DDBTile")]
+        static extern DDBError _GenerateTile(
+            [MarshalAs(UnmanagedType.LPStr)] string geotiffPath, int tz, int tx, int ty, out IntPtr outputTilePath, int tileSize, bool tms, bool forceRecreate);
+
+        public static string GenerateTile(string filePath, int tz, int tx, int ty, int tileSize, bool tms, bool forceRecreate = false)
+        {
+
+            if (filePath == null)
+                throw new ArgumentException("filePath is null");
+
+            try
+            {
+
+                if (_GenerateTile(filePath, tz, tx, ty, out var output, tileSize, tms, forceRecreate) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var res = Marshal.PtrToStringAnsi(output);
+
+                if (string.IsNullOrWhiteSpace(res))
+                    throw new DDBException("Unable get tile path");
+
+                return res;
+
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+
     }
 
 }
