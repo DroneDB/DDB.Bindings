@@ -45,7 +45,8 @@ namespace DDB.Tests
         public static void CleanDomain(string domain)
         {
             var folder = Path.Combine(Path.GetTempPath(), domain);
-            Directory.Delete(folder, true);
+            if (Directory.Exists(folder))
+                Directory.Delete(folder, true);
         }
 
         public void Dispose()
