@@ -22,6 +22,9 @@ namespace DDB.Tests
         private const string Test1ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/registry/DdbFactoryTest/testdb1.zip";
         private const string Test3ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/ddb-test/Test3.zip";
 
+        private const string TestGeoTiffUrl =
+            "https://github.com/DroneDB/test_data/raw/master/brighton/odm_orthophoto.tif";
+
         [SetUp]
         public void Setup()
         {
@@ -433,6 +436,24 @@ namespace DDB.Tests
                 info.Exists.Should().BeTrue();
                 info.Length.Should().BeGreaterThan(0);
 
+            }
+            finally
+            {
+                if (File.Exists(destPath)) File.Delete(destPath);
+            }
+        }
+
+        [Test]
+        public void GenerateTile_HappyPath_Ok()
+        {
+
+            using var tempFile = new TempFile(TestGeoTiffUrl, BaseTestFolder);
+
+            var destPath = Path.Combine(Path.GetTempPath(), "test.jpg");
+
+            try
+            {
+                var path = DroneDB.GenerateTile(tempFile.FilePath, 18, 64083, 92370, 256, true);
             }
             finally
             {
