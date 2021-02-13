@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using DDB.Bindings.Model;
 
 namespace DDB.Bindings
 {
@@ -339,6 +340,33 @@ namespace DDB.Bindings
         }
 
 
-    }
+        [DllImport("ddb", EntryPoint = "DDBDelta")]
+        private static extern DDBError _Delta([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
+            [MarshalAs(UnmanagedType.LPStr)] string ddbTarget, out IntPtr output, [MarshalAs(UnmanagedType.LPStr)] string format);
 
+        public static Delta Delta(string ddbSource, string ddbTarget)
+        {
+            
+            try
+            {
+
+                if (_Delta(ddbSource, ddbTarget, out var output, "json") !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+
+                if (string.IsNullOrWhiteSpace(json))
+                    throw new DDBException("Unable get delta");
+
+                return JsonConvert.DeserializeObject<Delta>(json);
+
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+    }
 }
