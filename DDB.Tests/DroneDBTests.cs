@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using DDB.Bindings.Model;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Newtonsoft.Json;
@@ -24,6 +25,9 @@ namespace DDB.Tests
 
         private const string TestGeoTiffUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/odm_orthophoto.tif";
+
+        private const string TestDelta1ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/delta/first.zip";
+        private const string TestDelta2ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/delta/second.zip";
 
         [SetUp]
         public void Setup()
@@ -459,6 +463,48 @@ namespace DDB.Tests
             {
                 if (File.Exists(destPath)) File.Delete(destPath);
             }
+        }
+
+        [Test]
+        public void Delta_HappyPath_Ok()
+        {
+            using var source = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
+            using var destination = new TestFS(TestDelta1ArchiveUrl, BaseTestFolder);
+
+            var delta = DroneDB.Delta(source.TestFolder, destination.TestFolder);
+
+            var expectedDelta = JsonConvert.DeserializeObject<Delta>(@"{
+                  ""Adds"": [
+                    {
+                      ""Path"": ""lol.txt"",
+                      ""Type"": 2
+                    },
+                    {
+                      ""Path"": ""tast"",
+                      ""Type"": 1
+                    },
+                    {
+                      ""Path"": ""tast/d.txt"",
+                      ""Type"": 2
+                    }
+                  ],
+                  ""Copies"": [    
+                      [""ciao.txt"", ""plutone.txt""],
+                      [ ""test/a.txt"", ""tast/a.txt""],    
+                      [""test/b.txt"", ""tast/b.txt""],    
+                      [""test/a.txt"", ""tast/c.txt""]    
+                  ],
+                  ""Removes"": [
+                    {
+                      ""Path"": ""ciao.txt"",
+                      ""Type"": 2
+                    }
+                  ]
+                }");
+
+            delta.Should().BeEquivalentTo(expectedDelta);
+
+
         }
 
         [Test]
