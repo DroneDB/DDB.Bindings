@@ -22,6 +22,8 @@ namespace DDB.Tests
         private const string Test1ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/registry/DdbFactoryTest/testdb1.zip";
         private const string Test3ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/ddb-test/Test3.zip";
 
+        private const string DdbFolder = ".ddb";
+
         private const string TestGeoTiffUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/odm_orthophoto.tif";
 
@@ -459,6 +461,93 @@ namespace DDB.Tests
             {
                 if (File.Exists(destPath)) File.Delete(destPath);
             }
+        }
+
+        [Test]
+        public void Tag_HappyPath_Ok()
+        {
+
+            const string goodTag = "pippo/pluto";
+            const string goodTagWithRegistry = "https://test.com/pippo/pluto";
+
+            using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
+
+            var tag = DroneDB.GetTag(ddbPath);
+
+            tag.Should().BeNull();
+
+            DroneDB.SetTag(ddbPath, goodTag);
+
+            tag = DroneDB.GetTag(ddbPath);
+
+            tag.Should().Be(goodTag);
+
+            DroneDB.SetTag(ddbPath, goodTagWithRegistry);
+
+            tag = DroneDB.GetTag(ddbPath);
+
+            tag.Should().Be(goodTagWithRegistry);
+
+        }
+        [Test]
+        public void Tag_ErrorCases_Ok()
+        {
+
+            const string badTag = "pippo";
+            const string badTag2 = "òàùò+èòè+òAAadff_-.-.,";
+
+            using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
+            
+            Action act = () => DroneDB.SetTag(ddbPath, badTag);
+
+            act.Should().Throw<DDBException>();
+
+            act = () => DroneDB.SetTag(ddbPath, badTag2);
+
+            act.Should().Throw<DDBException>();
+
+            act = () => DroneDB.SetTag(ddbPath, string.Empty);
+
+            act.Should().Throw<DDBException>();
+
+            act = () => DroneDB.SetTag(ddbPath, null);
+
+            act.Should().Throw<ArgumentException>();
+
+        }
+
+        [Test]
+        public void Sync_HappyPath_Ok()
+        {
+
+            const string registry = "test.com";
+            DateTime last = DateTime.Now.AddDays(-30);
+            
+            using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
+
+            var lastSync = DroneDB.GetLastSync(ddbPath);
+
+            lastSync.Should().BeNull();
+
+            DroneDB.SetLastSync(ddbPath);
+
+            lastSync = DroneDB.GetLastSync(ddbPath);
+
+            lastSync.Should().NotBeNull();
+            TestContext.WriteLine("LastSync = " + lastSync);
+
+            DroneDB.SetLastSync(ddbPath, registry, last);
+
+            lastSync = DroneDB.GetLastSync(ddbPath, registry);
+
+            lastSync.Should().BeCloseTo(last, TimeSpan.FromSeconds(1));
+
         }
 
         [Test]
