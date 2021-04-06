@@ -43,13 +43,16 @@ namespace DDB.Bindings
                     return Marshal.PtrToStringAnsi(outPath);
 
             }
+            catch(EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
 
             throw new DDBException(GetLastError());
-
 
         }
 
@@ -78,6 +81,10 @@ namespace DDB.Bindings
 
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -101,6 +108,11 @@ namespace DDB.Bindings
                 if (_Remove(ddbPath, paths, paths?.Length ?? 0) != DDBError.DDBERR_NONE)
                     throw new DDBException(GetLastError());
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -136,6 +148,11 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -172,6 +189,10 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -191,7 +212,11 @@ namespace DDB.Bindings
 
                 if (_AppendPassword(ddbPath, password) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
-                
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {
@@ -215,6 +240,10 @@ namespace DDB.Bindings
 
                 return res;
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -234,6 +263,10 @@ namespace DDB.Bindings
                 if (_ClearPasswords(ddbPath) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {
@@ -268,6 +301,10 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<Dictionary<string, object>>(res);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -300,6 +337,10 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
                 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -331,6 +372,10 @@ namespace DDB.Bindings
                 return res;
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -355,6 +400,10 @@ namespace DDB.Bindings
 
                 if (_SetTag(ddbPath, newTag) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {
@@ -383,6 +432,10 @@ namespace DDB.Bindings
                 return res == null || string.IsNullOrWhiteSpace(res) ? null : res;
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -410,6 +463,10 @@ namespace DDB.Bindings
                 return Utils.UnixTimestampToDateTime(outLastSync);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -434,6 +491,10 @@ namespace DDB.Bindings
 
                 if (_SetLastSync(ddbPath, registry, timestamp) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {

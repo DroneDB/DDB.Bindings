@@ -491,6 +491,7 @@ namespace DDB.Tests
             tag.Should().Be(goodTagWithRegistry);
 
         }
+
         [Test]
         public void Tag_ErrorCases_Ok()
         {
