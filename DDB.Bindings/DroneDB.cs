@@ -44,13 +44,16 @@ namespace DDB.Bindings
                     return Marshal.PtrToStringAnsi(outPath);
 
             }
+            catch(EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
 
             throw new DDBException(GetLastError());
-
 
         }
 
@@ -79,6 +82,10 @@ namespace DDB.Bindings
 
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -102,6 +109,11 @@ namespace DDB.Bindings
                 if (_Remove(ddbPath, paths, paths?.Length ?? 0) != DDBError.DDBERR_NONE)
                     throw new DDBException(GetLastError());
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -137,6 +149,11 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -173,6 +190,10 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<List<Entry>>(json);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -192,7 +213,11 @@ namespace DDB.Bindings
 
                 if (_AppendPassword(ddbPath, password) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
-                
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {
@@ -216,6 +241,10 @@ namespace DDB.Bindings
 
                 return res;
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -235,6 +264,10 @@ namespace DDB.Bindings
                 if (_ClearPasswords(ddbPath) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
             }
             catch (Exception ex)
             {
@@ -269,6 +302,10 @@ namespace DDB.Bindings
                 return JsonConvert.DeserializeObject<Dictionary<string, object>>(res);
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -301,6 +338,10 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
                 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -332,6 +373,10 @@ namespace DDB.Bindings
                 return res;
 
             }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
             catch (Exception ex)
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
@@ -339,7 +384,126 @@ namespace DDB.Bindings
 
         }
 
+        [DllImport("ddb", EntryPoint = "DDBSetTag")]
+        static extern DDBError _SetTag([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string newTag);
 
+        public static void SetTag(string ddbPath, string newTag)
+        {
+
+            if (ddbPath == null)
+                throw new ArgumentException("DDB path is null");
+            
+            if (newTag == null)
+                throw new ArgumentException("New tag is null");
+            
+            try
+            {
+
+                if (_SetTag(ddbPath, newTag) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBGetTag")]
+        static extern DDBError _GetTag([MarshalAs(UnmanagedType.LPStr)] string ddbPath, out IntPtr outTag);
+
+        public static string GetTag(string ddbPath)
+        {
+
+            if (ddbPath == null)
+                throw new ArgumentException("DDB path is null");
+
+            try
+            {
+
+                if (_GetTag(ddbPath, out var outTag) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var res = Marshal.PtrToStringAnsi(outTag);
+
+                return res == null || string.IsNullOrWhiteSpace(res) ? null : res;
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBGetLastSync")]
+        static extern DDBError _GetLastSync([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string registry, out long lastSync);
+
+        public static DateTime? GetLastSync(string ddbPath, string registry = null)
+        {
+
+            if (ddbPath == null)
+                throw new ArgumentException("DDB path is null");
+
+            try
+            {
+
+                if (_GetLastSync(ddbPath, registry, out var outLastSync) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                if (outLastSync == 0) return null;
+
+                return Utils.UnixTimestampToDateTime(outLastSync);
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBSetLastSync")]
+        static extern DDBError _SetLastSync([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string registry, long lastSync);
+
+        public static void SetLastSync(string ddbPath, string registry = null, DateTime? lastSync = null)
+        {
+
+            if (ddbPath == null)
+                throw new ArgumentException("DDB path is null");
+
+            try
+            {
+               
+                var timestamp =
+                    lastSync == null ? 0 : ((DateTimeOffset) lastSync.Value).ToUnixTimeMilliseconds() / 1000;
+
+                if (_SetLastSync(ddbPath, registry, timestamp) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+    
         [DllImport("ddb", EntryPoint = "DDBDelta")]
         private static extern DDBError _Delta([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
             [MarshalAs(UnmanagedType.LPStr)] string ddbTarget, out IntPtr output, [MarshalAs(UnmanagedType.LPStr)] string format);
@@ -357,6 +521,7 @@ namespace DDB.Bindings
 
                 if (string.IsNullOrWhiteSpace(json))
                     throw new DDBException("Unable get delta");
+
 
                 return JsonConvert.DeserializeObject<Delta>(json);
 
