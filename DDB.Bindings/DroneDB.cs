@@ -508,13 +508,13 @@ namespace DDB.Bindings
         private static extern DDBError _Delta([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
             [MarshalAs(UnmanagedType.LPStr)] string ddbTarget, out IntPtr output, [MarshalAs(UnmanagedType.LPStr)] string format);
 
-        public static Delta Delta(string ddbSource, string ddbTarget)
+        public static Delta Delta(string ddbPath, string ddbTarget)
         {
             
             try
             {
 
-                if (_Delta(ddbSource, ddbTarget, out var output, "json") !=
+                if (_Delta(ddbPath, ddbTarget, out var output, "json") !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
@@ -525,6 +525,26 @@ namespace DDB.Bindings
 
                 return JsonConvert.DeserializeObject<Delta>(json);
 
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBDelta")]
+        private static extern DDBError _MoveEntry([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
+            [MarshalAs(UnmanagedType.LPStr)] string source, [MarshalAs(UnmanagedType.LPStr)] string dest);
+
+        public static void MoveEntry(string ddbPath, string source, string dest)
+        {
+
+            try
+            {
+
+                if (_MoveEntry(ddbPath, source, dest)!=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
             }
             catch (Exception ex)
             {
