@@ -392,8 +392,6 @@ namespace DDB.Tests
 
         }
 
-        // Test3ArchiveUrl
-
         [Test]
         public void Chaddr_HappyPath_Ok()
         {
@@ -593,6 +591,18 @@ namespace DDB.Tests
                 }");
 
             delta.Should().BeEquivalentTo(expectedDelta);
+        }
+
+
+        [Test]
+        public void MoveEntry_SimpleRename_Ok()
+        {
+            using var test = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
+
+            DroneDB.MoveEntry(test.TestFolder, "plutone.txt", "test.txt");
+            
+            var res = DroneDB.List(test.TestFolder, ".", true);
+
         }
 
         [Test]
