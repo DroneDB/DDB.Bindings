@@ -598,11 +598,13 @@ namespace DDB.Tests
         public void MoveEntry_SimpleRename_Ok()
         {
             using var test = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
-
+            
             DroneDB.MoveEntry(test.TestFolder, "plutone.txt", "test.txt");
             
-            var res = DroneDB.List(test.TestFolder, ".", true);
+            var res = DroneDB.List(test.TestFolder, test.TestFolder, true);
 
+            res.Should().HaveCount(11);
+            res[8].Path.Should().Be("test.txt");
         }
 
         [Test]
