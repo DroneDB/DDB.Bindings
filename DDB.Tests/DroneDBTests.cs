@@ -554,7 +554,8 @@ namespace DDB.Tests
             lastSync.Should().BeCloseTo(last, TimeSpan.FromSeconds(1));
 
         }
-      
+
+        [Test]
         public void Delta_HappyPath_Ok()
         {
             using var source = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
