@@ -392,8 +392,6 @@ namespace DDB.Tests
 
         }
 
-        // Test3ArchiveUrl
-
         [Test]
         public void Chaddr_HappyPath_Ok()
         {
@@ -554,7 +552,8 @@ namespace DDB.Tests
             lastSync.Should().BeCloseTo(last, TimeSpan.FromSeconds(1));
 
         }
-      
+
+        [Test]
         public void Delta_HappyPath_Ok()
         {
             using var source = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
@@ -592,6 +591,20 @@ namespace DDB.Tests
                 }");
 
             delta.Should().BeEquivalentTo(expectedDelta);
+        }
+
+
+        [Test]
+        public void MoveEntry_SimpleRename_Ok()
+        {
+            using var test = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
+            
+            DroneDB.MoveEntry(test.TestFolder, "plutone.txt", "test.txt");
+            
+            var res = DroneDB.List(test.TestFolder, test.TestFolder, true);
+
+            res.Should().HaveCount(11);
+            res[8].Path.Should().Be("test.txt");
         }
 
         [Test]
