@@ -564,5 +564,30 @@ namespace DDB.Bindings
 
         }
 
+        [DllImport("ddb", EntryPoint = "DDBBuild")]
+        private static extern DDBError _Build([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
+            [MarshalAs(UnmanagedType.LPStr)] string source, [MarshalAs(UnmanagedType.LPStr)] string dest, bool force);
+
+        public static void Build(string ddbPath, string source = null, string dest = null, bool force = false)
+        {
+
+            try
+            {
+
+                if (_Build(ddbPath, source, dest, force) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
     }
 }

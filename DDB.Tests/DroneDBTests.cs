@@ -31,6 +31,9 @@ namespace DDB.Tests
         private const string TestDelta1ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/delta/first.zip";
         private const string TestDelta2ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/delta/second.zip";
 
+        private const string TestPointCloudUrl =
+            "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
+
         [SetUp]
         public void Setup()
         {
@@ -504,7 +507,7 @@ namespace DDB.Tests
             using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
 
             var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
-            
+
             Action act = () => DroneDB.SetTag(ddbPath, badTag);
 
             act.Should().Throw<DDBException>();
@@ -529,7 +532,7 @@ namespace DDB.Tests
 
             const string registry = "test.com";
             DateTime last = DateTime.Now.AddDays(-30);
-            
+
             using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
 
             var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
@@ -598,13 +601,35 @@ namespace DDB.Tests
         public void MoveEntry_SimpleRename_Ok()
         {
             using var test = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
-            
+
             DroneDB.MoveEntry(test.TestFolder, "plutone.txt", "test.txt");
-            
+
             var res = DroneDB.List(test.TestFolder, test.TestFolder, true);
 
             res.Should().HaveCount(11);
             res[8].Path.Should().Be("test.txt");
+        }
+
+        [Test]
+        public void Build_SimpleBuild_Ok()
+        {
+
+            using var test = new TestFS(Test1ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, "public", "default");
+
+            using var tempFile = new TempFile(TestPointCloudUrl, BaseTestFolder);
+
+            var destPath = Path.Combine(ddbPath, Path.GetFileName(tempFile.FilePath));
+
+            File.Move(tempFile.FilePath, destPath);
+
+            var res = DroneDB.Add(ddbPath, destPath);
+
+            res.Count.Should().Be(1);
+
+            DroneDB.Build(ddbPath);
+
         }
 
         [Test]
