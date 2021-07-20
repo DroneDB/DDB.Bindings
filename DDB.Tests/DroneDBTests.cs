@@ -614,28 +614,22 @@ namespace DDB.Tests
         public void Build_SimpleBuild_Ok()
         {
 
-            using var file = new TempFile(TestPointCloudUrl,
-                Path.Combine(BaseTestFolder, nameof(Build_SimpleBuild_Ok)));
+            using var test = new TestFS(Test1ArchiveUrl, BaseTestFolder);
 
-            var folder = Path.GetDirectoryName(file.FilePath);
-            
-            if (Directory.Exists(Path.Combine(folder, ".ddb"))) 
-                Directory.Delete(Path.Combine(folder, ".ddb"), true);
+            var ddbPath = Path.Combine(test.TestFolder, "public", "default");
 
-            try
-            {
+            using var tempFile = new TempFile(TestPointCloudUrl, BaseTestFolder);
 
-                DroneDB.Init(folder);
-                DroneDB.Add(folder, file.FilePath);
+            var destPath = Path.Combine(ddbPath, Path.GetFileName(tempFile.FilePath));
 
-                DroneDB.Build(folder);
+            File.Move(tempFile.FilePath, destPath);
 
-            }
-            finally
-            {
-                if (Directory.Exists(Path.Combine(folder, ".ddb")))
-                    Directory.Delete(Path.Combine(folder, ".ddb"), true);
-            }
+            var res = DroneDB.Add(ddbPath, destPath);
+
+            res.Count.Should().Be(1);
+
+            DroneDB.Build(ddbPath);
+
         }
 
         [Test]
