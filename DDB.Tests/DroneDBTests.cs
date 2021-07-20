@@ -32,7 +32,7 @@ namespace DDB.Tests
         private const string TestDelta2ArchiveUrl = "https://github.com/DroneDB/test_data/raw/master/delta/second.zip";
 
         private const string TestPointCloudUrl =
-            "https://github.com/DroneDB/test_data/blob/master/brighton/point_cloud.laz";
+            "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
 
         [SetUp]
         public void Setup()
