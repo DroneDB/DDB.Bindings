@@ -169,7 +169,7 @@ namespace DDB.Bindings
                                     bool recursive,
                                     int maxRecursionDepth = 0);
 
-        public static List<Entry> List(string ddbPath, string path, bool recursive = false, int maxRecursionDepth = 0)
+        public static List<Entry> List(string ddbPath, string path = "", bool recursive = false, int maxRecursionDepth = 0)
         {
             return List(ddbPath, path != null ? new[] { path } : null, recursive, maxRecursionDepth);
         }
@@ -619,16 +619,14 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaAdd")]
         static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
-        public static Meta MetaAdd(string ddbPath, string path, string key, string data)
+        public static Meta MetaAdd(string ddbPath, string key, string data, string path = "")
         {
-
             try
             {
                 if (_MetaAdd(ddbPath, path, key, data, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                Console.WriteLine(json);
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
@@ -640,6 +638,128 @@ namespace DDB.Bindings
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
 
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBMetaSet")]
+        static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
+
+        public static Meta MetaSet(string ddbPath, string key, string data, string path = "")
+        {
+            try
+            {
+                if (_MetaSet(ddbPath, path, key, data, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+                return JsonConvert.DeserializeObject<Meta>(json);
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBMetaRemove")]
+        static extern DDBError _MetaRemove([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string id, out IntPtr output);
+
+        public static int MetaRemove(string ddbPath, string id)
+        {
+            try
+            {
+                if (_MetaRemove(ddbPath, id, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+                var def = new { Removed = 0 };
+
+                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBMetaGet")]
+        static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+
+        public static Meta MetaGet(string ddbPath, string key, string path = "")
+        {
+            try
+            {
+                if (_MetaGet(ddbPath, path, key, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+                return JsonConvert.DeserializeObject<Meta>(json);
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBMetaUnset")]
+        static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+
+        public static int MetaUnset(string ddbPath, string key, string path = "")
+        {
+            try
+            {
+                if (_MetaUnset(ddbPath, path, key, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+                var def = new { Removed = 0 };
+
+                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+        }
+
+
+        [DllImport("ddb", EntryPoint = "DDBMetaList")]
+        static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
+
+        public static List<MetaListItem> MetaList(string ddbPath, string path = "")
+        {
+            try
+            {
+                if (_MetaList(ddbPath, path, out var output) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var json = Marshal.PtrToStringAnsi(output);
+                return JsonConvert.DeserializeObject<List<MetaListItem>>(json);
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
         }
 
     }
