@@ -14,8 +14,7 @@ namespace DDB.Bindings.Model
         public string Hash { get; set; }
         public EntryType Type { get; set; }
 
-        // TODO: this might change in the future
-        public Dictionary<string, object> Meta { get; set; }
+        public Dictionary<string, object> Properties { get; set; }
 
         [JsonProperty("mtime")]
         [JsonConverter(typeof(SecondEpochConverter))]

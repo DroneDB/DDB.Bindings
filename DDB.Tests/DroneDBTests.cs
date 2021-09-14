@@ -34,6 +34,13 @@ namespace DDB.Tests
         private const string TestPointCloudUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
 
+        private void CreateEmptyDDB(string folder)
+        {
+            if (Directory.Exists(folder)) Directory.Delete(folder, true);
+            Directory.CreateDirectory(folder);
+            DroneDB.Init(folder);
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -190,11 +197,11 @@ namespace DDB.Tests
             // Just check some fields
             //info.Meta.Should().BeEquivalentTo(expectedMeta);
 
-            info.Meta.Should().NotBeEmpty();
-            info.Meta.Should().HaveCount(14);
-            info.Meta["make"].Should().Be("DJI");
-            info.Meta["model"].Should().Be("FC300S");
-            info.Meta["sensor"].Should().Be("dji fc300s");
+            info.Properties.Should().NotBeEmpty();
+            info.Properties.Should().HaveCount(14);
+            info.Properties["make"].Should().Be("DJI");
+            info.Properties["model"].Should().Be("FC300S");
+            info.Properties["sensor"].Should().Be("dji fc300s");
             info.Hash.Should().Be("246fed68dec31b17dc6d885cee10a2c08f2f1c68901a8efa132c60bdb770e5ff");
             info.Type.Should().Be(EntryType.GeoImage);
             info.Size.Should().Be(3876862);
@@ -255,7 +262,7 @@ namespace DDB.Tests
             file.Depth.Should().Be(expectedDepth);
             file.Size.Should().Be(expectedSize);
             file.Type.Should().Be(expectedType);
-            file.Meta.Should().BeEquivalentTo(expectedMeta);
+            file.Properties.Should().BeEquivalentTo(expectedMeta);
             file.PointGeometry.Should().NotBeNull();
             //file.PointGeometry.Coordinates.Latitude.Should().BeApproximately(expectedLatitude, 0.00001);
             //file.PointGeometry.Coordinates.Longitude.Should().BeApproximately(expectedLongitude, 0.00001);
@@ -276,7 +283,7 @@ namespace DDB.Tests
             var entry = res.First();
 
             Entry expectedEntry = JsonConvert.DeserializeObject<Entry>(
-                "{\"depth\":0,\"hash\":\"3157958dd4f2562c8681867dfd6ee5bf70b6e9595b3e3b4b76bbda28342569ed\",\"meta\":{\"cameraPitch\":-89.9000015258789,\"cameraRoll\":0.0,\"cameraYaw\":-131.3000030517578,\"captureTime\":1466699584000.0,\"focalLength\":3.4222222222222225,\"focalLength35\":20.0,\"height\":2250,\"make\":\"DJI\",\"model\":\"FC300S\",\"orientation\":1,\"sensor\":\"dji fc300s\",\"sensorHeight\":3.4650000000000003,\"sensorWidth\":6.16,\"width\":4000},\"mtime\":1491156087,\"path\":\"DJI_0027.JPG\",\"point_geom\":{\"crs\":{\"properties\":{\"name\":\"EPSG:4326\"},\"type\":\"name\"},\"geometry\":{\"coordinates\":[-91.99408299999999,46.84260499999999,198.5099999999999],\"type\":\"Point\"},\"properties\":{},\"type\":\"Feature\"},\"polygon_geom\":{\"crs\":{\"properties\":{\"name\":\"EPSG:4326\"},\"type\":\"name\"},\"geometry\":{\"coordinates\":[[[-91.99397836402999,46.8422402913,158.5099999999999],[-91.99357489543,46.84247729175999,158.5099999999999],[-91.99418894036,46.84296945989999,158.5099999999999],[-91.99459241001999,46.8427324573,158.5099999999999],[-91.99397836402999,46.8422402913,158.5099999999999]]],\"type\":\"Polygon\"},\"properties\":{},\"type\":\"Feature\"},\"size\":3185449,\"type\":3}");
+                "{\"depth\":0,\"hash\":\"3157958dd4f2562c8681867dfd6ee5bf70b6e9595b3e3b4b76bbda28342569ed\",\"properties\":{\"cameraPitch\":-89.9000015258789,\"cameraRoll\":0.0,\"cameraYaw\":-131.3000030517578,\"captureTime\":1466699584000.0,\"focalLength\":3.4222222222222225,\"focalLength35\":20.0,\"height\":2250,\"make\":\"DJI\",\"model\":\"FC300S\",\"orientation\":1,\"sensor\":\"dji fc300s\",\"sensorHeight\":3.4650000000000003,\"sensorWidth\":6.16,\"width\":4000},\"mtime\":1491156087,\"path\":\"DJI_0027.JPG\",\"point_geom\":{\"crs\":{\"properties\":{\"name\":\"EPSG:4326\"},\"type\":\"name\"},\"geometry\":{\"coordinates\":[-91.99408299999999,46.84260499999999,198.5099999999999],\"type\":\"Point\"},\"properties\":{},\"type\":\"Feature\"},\"polygon_geom\":{\"crs\":{\"properties\":{\"name\":\"EPSG:4326\"},\"type\":\"name\"},\"geometry\":{\"coordinates\":[[[-91.99397836402999,46.8422402913,158.5099999999999],[-91.99357489543,46.84247729175999,158.5099999999999],[-91.99418894036,46.84296945989999,158.5099999999999],[-91.99459241001999,46.8427324573,158.5099999999999],[-91.99397836402999,46.8422402913,158.5099999999999]]],\"type\":\"Polygon\"},\"properties\":{},\"type\":\"Feature\"},\"size\":3185449,\"type\":3}");
 
             entry.Should().BeEquivalentTo(expectedEntry);
 
@@ -662,6 +669,84 @@ namespace DDB.Tests
 
             DroneDB.IsBuildable(test.TestFolder, "lol.txt").Should().BeFalse();
 
+        }
+
+        [Test]
+        public void MetaAdd_Ok()
+        {
+            CreateEmptyDDB("metaAddOkTest");
+
+            ((Action)(() => DroneDB.MetaAdd("metaAddTest", "test", "123"))).Should().Throw<DDBException>(); // Needs plural key           DroneDB.MetaAdd("metaAddTest", "", "tests", "123").Data.ToObject<int>().Should().Be(123);
+        }
+
+        [Test]
+        public void MetaAdd_Json()
+        {
+            CreateEmptyDDB("metaAddJsonTest");
+
+            var res = DroneDB.MetaAdd("metaAddJsonTest", "tests", "{\"test\": true}");
+            res.Data.ToObject<JObject>()["test"].ToObject<bool>().Should().BeTrue();
+            res.Id.Should().NotBeNull();
+            res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, 10000);
+        }
+
+        [Test]
+        public void MetaSet_Ok()
+        {
+            CreateEmptyDDB("metaSetOkTest");
+            var f = Path.Join("metaSetOkTest", "test.txt");
+
+            File.Create(f).Close();
+            DroneDB.Add("metaSetOkTest", f);
+
+            ((Action)(() => DroneDB.MetaSet("metaSetOkTest", "tests", "123", f))).Should().Throw<DDBException>(); // Needs singular key
+            DroneDB.MetaSet("metaSetOkTest", "test", "abc", f).Data.ToObject<string>().Should().Equals("abc");
+            DroneDB.MetaSet("metaSetOkTest", "test", "efg", f).Data.ToObject<string>().Should().Equals("efg");
+        }
+
+        [Test]
+        public void MetaRemove_Ok()
+        {
+            CreateEmptyDDB("metaRemoveOkTest");
+            var id = DroneDB.MetaSet("metaRemoveOkTest", "test", "123").Id;
+            DroneDB.MetaRemove("metaRemoveOkTest", "invalid").Should().Be(0);
+            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(1);
+            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(0);
+        }
+
+        [Test]
+        public void MetaGet_Ok()
+        {
+            CreateEmptyDDB("metaGetOkTest");
+            DroneDB.MetaSet("metaGetOkTest", "abc", "true");
+            
+            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "nonexistant"))).Should().Throw<DDBException>();
+            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "abc", "123"))).Should().Throw<DDBException>();
+            DroneDB.MetaGet("metaGetOkTest", "abc").Data.ToObject<bool>().Should().BeTrue();
+        }
+
+        [Test]
+        public void MetaUnset_Ok()
+        {
+            CreateEmptyDDB("metaUnsetOkTest");
+            var f = Path.Join("metaUnsetOkTest", "test.txt");
+            File.Create(f).Close();
+            DroneDB.Add("metaUnsetOkTest", f);
+
+            DroneDB.Add("metaUnsetOkTest", f);
+            DroneDB.MetaSet("metaUnsetOkTest", "abc", "[1,2,3]");
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc", f).Should().Be(0);
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(1);
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(0);
+        }
+
+        [Test]
+        public void MetaList_Ok()
+        {
+            CreateEmptyDDB("metaListOkTest");
+            DroneDB.MetaAdd("metaListOkTest", "annotations", "123");
+            DroneDB.MetaAdd("metaListOkTest", "examples", "abc");
+            DroneDB.MetaList("metaListOkTest").Count.Should().Be(2);
         }
 
         [Test]
