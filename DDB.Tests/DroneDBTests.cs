@@ -633,6 +633,38 @@ namespace DDB.Tests
         }
 
         [Test]
+        public void IsBuildable_PointCloud_True()
+        {
+
+            using var test = new TestFS(Test1ArchiveUrl, BaseTestFolder);
+
+            var ddbPath = Path.Combine(test.TestFolder, "public", "default");
+
+            using var tempFile = new TempFile(TestPointCloudUrl, BaseTestFolder);
+
+            var destPath = Path.Combine(ddbPath, Path.GetFileName(tempFile.FilePath));
+
+            File.Move(tempFile.FilePath, destPath);
+
+            var res = DroneDB.Add(ddbPath, destPath);
+
+            res.Count.Should().Be(1);
+
+            DroneDB.IsBuildable(ddbPath, Path.GetFileName(destPath)).Should().BeTrue();
+
+        }
+
+        [Test]
+        public void IsBuildable_TextFile_False()
+        {
+
+            using var test = new TestFS(TestDelta2ArchiveUrl, BaseTestFolder);
+
+            DroneDB.IsBuildable(test.TestFolder, "lol.txt").Should().BeFalse();
+
+        }
+
+        [Test]
         [Explicit("Clean test directory")]
         public void Clean_Domain()
         {
