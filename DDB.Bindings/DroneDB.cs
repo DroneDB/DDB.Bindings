@@ -628,6 +628,7 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+                Console.WriteLine(json);
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)

@@ -34,6 +34,13 @@ namespace DDB.Tests
         private const string TestPointCloudUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
 
+        private void CreateEmptyDDB(string folder)
+        {
+            if (Directory.Exists(folder)) Directory.Delete(folder, true);
+            Directory.CreateDirectory(folder);
+            DroneDB.Init(folder);
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -662,6 +669,26 @@ namespace DDB.Tests
 
             DroneDB.IsBuildable(test.TestFolder, "lol.txt").Should().BeFalse();
 
+        }
+
+        [Test]
+        public void MetaAdd_Ok()
+        {
+            CreateEmptyDDB("metaAddOkTest");
+
+            ((Action)(() => DroneDB.MetaAdd("metaAddTest", "", "test", "123"))).Should().Throw<DDBException>(); // Needs plural key
+            DroneDB.MetaAdd("metaAddTest", "", "tests", "123").Data.ToObject<int>().Should().Be(123);
+        }
+
+        [Test]
+        public void MetaAdd_Json()
+        {
+            CreateEmptyDDB("metaAddJsonTest");
+
+            var res = DroneDB.MetaAdd("metaAddJsonTest", "", "tests", "{\"test\": true}");
+            res.Data.ToObject<JObject>()["test"].ToObject<bool>().Should().BeTrue();
+            res.Id.Should().NotBeNull();
+            res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, 10000);
         }
 
         [Test]
