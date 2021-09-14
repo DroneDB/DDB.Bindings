@@ -34,6 +34,13 @@ namespace DDB.Tests
         private const string TestPointCloudUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
 
+        private void CreateEmptyDDB(string folder)
+        {
+            if (Directory.Exists(folder)) Directory.Delete(folder, true);
+            Directory.CreateDirectory(folder);
+            DroneDB.Init(folder);
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -662,6 +669,84 @@ namespace DDB.Tests
 
             DroneDB.IsBuildable(test.TestFolder, "lol.txt").Should().BeFalse();
 
+        }
+
+        [Test]
+        public void MetaAdd_Ok()
+        {
+            CreateEmptyDDB("metaAddOkTest");
+
+            ((Action)(() => DroneDB.MetaAdd("metaAddTest", "test", "123"))).Should().Throw<DDBException>(); // Needs plural key           DroneDB.MetaAdd("metaAddTest", "", "tests", "123").Data.ToObject<int>().Should().Be(123);
+        }
+
+        [Test]
+        public void MetaAdd_Json()
+        {
+            CreateEmptyDDB("metaAddJsonTest");
+
+            var res = DroneDB.MetaAdd("metaAddJsonTest", "tests", "{\"test\": true}");
+            res.Data.ToObject<JObject>()["test"].ToObject<bool>().Should().BeTrue();
+            res.Id.Should().NotBeNull();
+            res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, 10000);
+        }
+
+        [Test]
+        public void MetaSet_Ok()
+        {
+            CreateEmptyDDB("metaSetOkTest");
+            var f = Path.Join("metaSetOkTest", "test.txt");
+
+            File.Create(f).Close();
+            DroneDB.Add("metaSetOkTest", f);
+
+            ((Action)(() => DroneDB.MetaSet("metaSetOkTest", "tests", "123", f))).Should().Throw<DDBException>(); // Needs singular key
+            DroneDB.MetaSet("metaSetOkTest", "test", "abc", f).Data.ToObject<string>().Should().Equals("abc");
+            DroneDB.MetaSet("metaSetOkTest", "test", "efg", f).Data.ToObject<string>().Should().Equals("efg");
+        }
+
+        [Test]
+        public void MetaRemove_Ok()
+        {
+            CreateEmptyDDB("metaRemoveOkTest");
+            var id = DroneDB.MetaSet("metaRemoveOkTest", "test", "123").Id;
+            DroneDB.MetaRemove("metaRemoveOkTest", "invalid").Should().Be(0);
+            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(1);
+            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(0);
+        }
+
+        [Test]
+        public void MetaGet_Ok()
+        {
+            CreateEmptyDDB("metaGetOkTest");
+            DroneDB.MetaSet("metaGetOkTest", "abc", "true");
+            
+            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "nonexistant"))).Should().Throw<DDBException>();
+            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "abc", "123"))).Should().Throw<DDBException>();
+            DroneDB.MetaGet("metaGetOkTest", "abc").Data.ToObject<bool>().Should().BeTrue();
+        }
+
+        [Test]
+        public void MetaUnset_Ok()
+        {
+            CreateEmptyDDB("metaUnsetOkTest");
+            var f = Path.Join("metaUnsetOkTest", "test.txt");
+            File.Create(f).Close();
+            DroneDB.Add("metaUnsetOkTest", f);
+
+            DroneDB.Add("metaUnsetOkTest", f);
+            DroneDB.MetaSet("metaUnsetOkTest", "abc", "[1,2,3]");
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc", f).Should().Be(0);
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(1);
+            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(0);
+        }
+
+        [Test]
+        public void MetaList_Ok()
+        {
+            CreateEmptyDDB("metaListOkTest");
+            DroneDB.MetaAdd("metaListOkTest", "annotations", "123");
+            DroneDB.MetaAdd("metaListOkTest", "examples", "abc");
+            DroneDB.MetaList("metaListOkTest").Count.Should().Be(2);
         }
 
         [Test]
