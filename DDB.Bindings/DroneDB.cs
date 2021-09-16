@@ -714,7 +714,7 @@ namespace DDB.Bindings
         static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
             [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static Meta MetaGet(string ddbPath, string key, string path = null)
+        public static Meta[] MetaGet(string ddbPath, string key, string path = null)
         {
             try
             {
@@ -722,7 +722,7 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                return json == null ? null : JsonConvert.DeserializeObject<Meta>(json);
+                return json == null ? null : JsonConvert.DeserializeObject<Meta[]>(json);
             }
             catch (EntryPointNotFoundException ex)
             {

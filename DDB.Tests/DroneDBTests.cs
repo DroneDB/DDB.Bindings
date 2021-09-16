@@ -731,7 +731,20 @@ namespace DDB.Tests
             FluentActions.Invoking(() => DroneDB.MetaGet(area.TestFolder, "abc", "123")).Should()
                 .Throw<DDBException>();
 
-            DroneDB.MetaGet(area.TestFolder, "abc").Data.Should().Be(true);
+            DroneDB.MetaGet(area.TestFolder, "abc").First().Data.Should().Be(true);
+        }
+
+        [Test]
+        public void MetaGet_Ok2()
+        {
+            using var area = new TestArea("metaGetOkTest");
+            DroneDB.Init(area.TestFolder);
+
+            DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\":true}");
+            DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\":false}");
+            DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\":null}");
+
+            var res = DroneDB.MetaGet(area.TestFolder, "tests");
         }
 
         [Test]
