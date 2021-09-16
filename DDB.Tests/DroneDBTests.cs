@@ -34,13 +34,6 @@ namespace DDB.Tests
         private const string TestPointCloudUrl =
             "https://github.com/DroneDB/test_data/raw/master/brighton/point_cloud.laz";
 
-        private void CreateEmptyDDB(string folder)
-        {
-            if (Directory.Exists(folder)) Directory.Delete(folder, true);
-            Directory.CreateDirectory(folder);
-            DroneDB.Init(folder);
-        }
-
         [SetUp]
         public void Setup()
         {
@@ -674,18 +667,22 @@ namespace DDB.Tests
         [Test]
         public void MetaAdd_Ok()
         {
-            CreateEmptyDDB("metaAddOkTest");
+            using var area = new TestArea("metaAddOkTest");
+            DroneDB.Init(area.TestFolder);
 
-            ((Action)(() => DroneDB.MetaAdd("metaAddTest", "test", "123"))).Should().Throw<DDBException>(); // Needs plural key           DroneDB.MetaAdd("metaAddTest", "", "tests", "123").Data.ToObject<int>().Should().Be(123);
+            FluentActions.Invoking(() => DroneDB.MetaAdd(area.TestFolder, "test", "123")).Should()
+                .Throw<DDBException>(); // Needs plural key
+            // DroneDB.MetaAdd("metaAddTest", "", "tests", "123").Data.ToObject<int>().Should().Be(123);
         }
 
         [Test]
         public void MetaAdd_Json()
         {
-            CreateEmptyDDB("metaAddJsonTest");
+            using var area = new TestArea("metaAddJsonTest");
+            DroneDB.Init(area.TestFolder);
 
-            var res = DroneDB.MetaAdd("metaAddJsonTest", "tests", "{\"test\": true}");
-            res.Data.ToObject<JObject>()["test"].ToObject<bool>().Should().BeTrue();
+            var res = DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\": true}");
+            JsonConvert.SerializeObject(res.Data).Should().Be("{\"test\":true}");
             res.Id.Should().NotBeNull();
             res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, 10000);
         }
@@ -693,60 +690,76 @@ namespace DDB.Tests
         [Test]
         public void MetaSet_Ok()
         {
-            CreateEmptyDDB("metaSetOkTest");
-            var f = Path.Join("metaSetOkTest", "test.txt");
+            using var area = new TestArea("metaSetOkTest");
+            DroneDB.Init(area.TestFolder);
 
-            File.Create(f).Close();
-            DroneDB.Add("metaSetOkTest", f);
+            var f = Path.Join(area.TestFolder, "test.txt");
+            File.WriteAllText(f, null);
+            
+            DroneDB.Add(area.TestFolder, f);
 
-            ((Action)(() => DroneDB.MetaSet("metaSetOkTest", "tests", "123", f))).Should().Throw<DDBException>(); // Needs singular key
-            DroneDB.MetaSet("metaSetOkTest", "test", "abc", f).Data.ToObject<string>().Should().Equals("abc");
-            DroneDB.MetaSet("metaSetOkTest", "test", "efg", f).Data.ToObject<string>().Should().Equals("efg");
+            FluentActions.Invoking(() => DroneDB.MetaSet(area.TestFolder, "tests", "123", f)).Should()
+                .Throw<DDBException>(); // Needs singular key
+
+            DroneDB.MetaSet(area.TestFolder, "test", "abc", f).Data.Should().Be("abc");
+            DroneDB.MetaSet(area.TestFolder, "test", "efg", f).Data.Should().Be("efg");
         }
 
         [Test]
         public void MetaRemove_Ok()
         {
-            CreateEmptyDDB("metaRemoveOkTest");
-            var id = DroneDB.MetaSet("metaRemoveOkTest", "test", "123").Id;
-            DroneDB.MetaRemove("metaRemoveOkTest", "invalid").Should().Be(0);
-            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(1);
-            DroneDB.MetaRemove("metaRemoveOkTest", id).Should().Be(0);
+            using var area = new TestArea("metaRemoveOkTest");
+            DroneDB.Init(area.TestFolder);
+
+            var id = DroneDB.MetaSet(area.TestFolder, "test", "123").Id;
+            DroneDB.MetaRemove(area.TestFolder, "invalid").Should().Be(0);
+            DroneDB.MetaRemove(area.TestFolder, id).Should().Be(1);
+            DroneDB.MetaRemove(area.TestFolder, id).Should().Be(0);
         }
 
         [Test]
         public void MetaGet_Ok()
         {
-            CreateEmptyDDB("metaGetOkTest");
-            DroneDB.MetaSet("metaGetOkTest", "abc", "true");
-            
-            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "nonexistant"))).Should().Throw<DDBException>();
-            ((Action)(() => DroneDB.MetaGet("metaGetOkTest", "abc", "123"))).Should().Throw<DDBException>();
-            DroneDB.MetaGet("metaGetOkTest", "abc").Data.ToObject<bool>().Should().BeTrue();
+            using var area = new TestArea("metaGetOkTest");
+            DroneDB.Init(area.TestFolder);
+
+            DroneDB.MetaSet(area.TestFolder, "abc", "true");
+
+            FluentActions.Invoking(() => DroneDB.MetaGet(area.TestFolder, "nonexistant")).Should()
+                .Throw<DDBException>();
+
+            FluentActions.Invoking(() => DroneDB.MetaGet(area.TestFolder, "abc", "123")).Should()
+                .Throw<DDBException>();
+
+            DroneDB.MetaGet(area.TestFolder, "abc").Data.Should().Be(true);
         }
 
         [Test]
         public void MetaUnset_Ok()
         {
-            CreateEmptyDDB("metaUnsetOkTest");
-            var f = Path.Join("metaUnsetOkTest", "test.txt");
-            File.Create(f).Close();
-            DroneDB.Add("metaUnsetOkTest", f);
+            using var area = new TestArea("metaUnsetOkTest");
+            DroneDB.Init(area.TestFolder);
+            
+            var f = Path.Join(area.TestFolder, "test.txt");
+            File.WriteAllText(f, null);
 
-            DroneDB.Add("metaUnsetOkTest", f);
-            DroneDB.MetaSet("metaUnsetOkTest", "abc", "[1,2,3]");
-            DroneDB.MetaUnset("metaUnsetOkTest", "abc", f).Should().Be(0);
-            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(1);
-            DroneDB.MetaUnset("metaUnsetOkTest", "abc").Should().Be(0);
+            DroneDB.Add(area.TestFolder, f);
+
+            DroneDB.MetaSet(area.TestFolder, "abc", "[1,2,3]");
+            DroneDB.MetaUnset(area.TestFolder, "abc", f).Should().Be(0);
+            DroneDB.MetaUnset(area.TestFolder, "abc").Should().Be(1);
+            DroneDB.MetaUnset(area.TestFolder, "abc").Should().Be(0);
         }
 
         [Test]
         public void MetaList_Ok()
         {
-            CreateEmptyDDB("metaListOkTest");
-            DroneDB.MetaAdd("metaListOkTest", "annotations", "123");
-            DroneDB.MetaAdd("metaListOkTest", "examples", "abc");
-            DroneDB.MetaList("metaListOkTest").Count.Should().Be(2);
+            using var area = new TestArea("metaListOkTest");
+            DroneDB.Init(area.TestFolder);
+
+            DroneDB.MetaAdd(area.TestFolder, "annotations", "123");
+            DroneDB.MetaAdd(area.TestFolder, "examples", "abc");
+            DroneDB.MetaList(area.TestFolder).Should().HaveCount(2);
         }
 
         [Test]
