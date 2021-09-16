@@ -619,11 +619,11 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaAdd")]
         static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
-        public static Meta MetaAdd(string ddbPath, string key, string data, string path = "")
+        public static Meta MetaAdd(string ddbPath, string key, string data, string path = null)
         {
             try
             {
-                if (_MetaAdd(ddbPath, path, key, data, out var output) !=
+                if (_MetaAdd(ddbPath, path ?? string.Empty, key, data, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
@@ -643,11 +643,11 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaSet")]
         static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
-        public static Meta MetaSet(string ddbPath, string key, string data, string path = "")
+        public static Meta MetaSet(string ddbPath, string key, string data, string path = null)
         {
             try
             {
-                if (_MetaSet(ddbPath, path, key, data, out var output) !=
+                if (_MetaSet(ddbPath, path ?? string.Empty, key, data, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
@@ -693,11 +693,11 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaGet")]
         static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static Meta MetaGet(string ddbPath, string key, string path = "")
+        public static Meta MetaGet(string ddbPath, string key, string path = null)
         {
             try
             {
-                if (_MetaGet(ddbPath, path, key, out var output) !=
+                if (_MetaGet(ddbPath, path ?? string.Empty, key, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
@@ -716,11 +716,11 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaUnset")]
         static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static int MetaUnset(string ddbPath, string key, string path = "")
+        public static int MetaUnset(string ddbPath, string key, string path = null)
         {
             try
             {
-                if (_MetaUnset(ddbPath, path, key, out var output) !=
+                if (_MetaUnset(ddbPath, path ?? string.Empty, key, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
@@ -742,11 +742,11 @@ namespace DDB.Bindings
         [DllImport("ddb", EntryPoint = "DDBMetaList")]
         static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
 
-        public static List<MetaListItem> MetaList(string ddbPath, string path = "")
+        public static List<MetaListItem> MetaList(string ddbPath, string path = null)
         {
             try
             {
-                if (_MetaList(ddbPath, path, out var output) !=
+                if (_MetaList(ddbPath, path ?? string.Empty, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
