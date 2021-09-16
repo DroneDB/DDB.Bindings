@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using DDB.Bindings.Model;
+using Newtonsoft.Json.Linq;
 
 namespace DDB.Bindings
 {
@@ -628,6 +629,10 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+                
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
@@ -653,6 +658,9 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+                
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
@@ -678,9 +686,18 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                var def = new { Removed = 0 };
 
-                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaRemove call");
+
+                var obj = JsonConvert.DeserializeObject<JObject>(json);
+
+                if (obj == null || !obj.ContainsKey("removed"))
+                    throw new InvalidOperationException($"Expected 'removed' field but got '{json}'");
+
+                // ReSharper disable once PossibleNullReferenceException
+                return obj["removed"].ToObject<int>();
+
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -705,7 +722,7 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                return JsonConvert.DeserializeObject<Meta>(json);
+                return json == null ? null : JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -729,9 +746,18 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                var def = new { Removed = 0 };
 
-                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+                if (json == null) 
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+
+                var obj = JsonConvert.DeserializeObject<JObject>(json);
+
+                if (obj == null || !obj.ContainsKey("removed"))
+                    throw new InvalidOperationException($"Expected 'removed' field but got '{json}'");
+
+                // ReSharper disable once PossibleNullReferenceException
+                return obj["removed"].ToObject<int>();
+
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -756,6 +782,10 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+
                 return JsonConvert.DeserializeObject<List<MetaListItem>>(json);
             }
             catch (EntryPointNotFoundException ex)
