@@ -230,7 +230,7 @@ namespace DDB.Tests
             const string fileName = "Sub/20200610_144436.jpg";
             const int expectedDepth = 1;
             const int expectedSize = 8248241;
-            const int expectedType = 3;
+            var expectedType = EntryType.GeoImage;
             const string expectedHash = "f27ddc96daf9aeff3c026de8292681296c3e9d952b647235878c50f2b7b39e94";
             var expectedModifiedTime = new DateTime(2020, 06, 10, 14, 44, 36);
             var expectedMeta = JsonConvert.DeserializeObject<Dictionary<string, object>>(
@@ -684,7 +684,7 @@ namespace DDB.Tests
             var res = DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\": true}");
             JsonConvert.SerializeObject(res.Data).Should().Be("{\"test\":true}");
             res.Id.Should().NotBeNull();
-            res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, 10000);
+            res.ModifiedTime.Should().BeCloseTo(DateTime.UtcNow, new TimeSpan(0,0,1));
         }
 
         [Test]
