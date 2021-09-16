@@ -617,7 +617,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaAdd")]
-        static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
+        static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
         public static Meta MetaAdd(string ddbPath, string key, string data, string path = null)
         {
@@ -641,7 +642,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaSet")]
-        static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
+        static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
         public static Meta MetaSet(string ddbPath, string key, string data, string path = null)
         {
@@ -665,7 +667,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaRemove")]
-        static extern DDBError _MetaRemove([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string id, out IntPtr output);
+        static extern DDBError _MetaRemove([MarshalAs(UnmanagedType.LPStr)] string ddbPath, 
+            [MarshalAs(UnmanagedType.LPStr)] string id, out IntPtr output);
 
         public static int MetaRemove(string ddbPath, string id)
         {
@@ -691,7 +694,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaGet")]
-        static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+        static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
         public static Meta MetaGet(string ddbPath, string key, string path = null)
         {
@@ -714,7 +718,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaUnset")]
-        static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+        static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
         public static int MetaUnset(string ddbPath, string key, string path = null)
         {
@@ -740,7 +745,8 @@ namespace DDB.Bindings
 
 
         [DllImport("ddb", EntryPoint = "DDBMetaList")]
-        static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
+        static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, 
+            [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
 
         public static List<MetaListItem> MetaList(string ddbPath, string path = null)
         {
