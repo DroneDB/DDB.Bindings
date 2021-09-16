@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using DDB.Bindings.Model;
+using Newtonsoft.Json.Linq;
 
 namespace DDB.Bindings
 {
@@ -617,16 +618,21 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaAdd")]
-        static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
+        static extern DDBError _MetaAdd([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
-        public static Meta MetaAdd(string ddbPath, string key, string data, string path = "")
+        public static Meta MetaAdd(string ddbPath, string key, string data, string path = null)
         {
             try
             {
-                if (_MetaAdd(ddbPath, path, key, data, out var output) !=
+                if (_MetaAdd(ddbPath, path ?? string.Empty, key, data, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+                
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
@@ -641,16 +647,20 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaSet")]
-        static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
+        static extern DDBError _MetaSet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, [MarshalAs(UnmanagedType.LPStr)] string data, out IntPtr output);
 
-        public static Meta MetaSet(string ddbPath, string key, string data, string path = "")
+        public static Meta MetaSet(string ddbPath, string key, string data, string path = null)
         {
             try
             {
-                if (_MetaSet(ddbPath, path, key, data, out var output) !=
+                if (_MetaSet(ddbPath, path ?? string.Empty, key, data, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+                
                 return JsonConvert.DeserializeObject<Meta>(json);
             }
             catch (EntryPointNotFoundException ex)
@@ -665,7 +675,8 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaRemove")]
-        static extern DDBError _MetaRemove([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string id, out IntPtr output);
+        static extern DDBError _MetaRemove([MarshalAs(UnmanagedType.LPStr)] string ddbPath, 
+            [MarshalAs(UnmanagedType.LPStr)] string id, out IntPtr output);
 
         public static int MetaRemove(string ddbPath, string id)
         {
@@ -675,9 +686,18 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                var def = new { Removed = 0 };
 
-                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaRemove call");
+
+                var obj = JsonConvert.DeserializeObject<JObject>(json);
+
+                if (obj == null || !obj.ContainsKey("removed"))
+                    throw new InvalidOperationException($"Expected 'removed' field but got '{json}'");
+
+                // ReSharper disable once PossibleNullReferenceException
+                return obj["removed"].ToObject<int>();
+
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -691,17 +711,19 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBMetaGet")]
-        static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+        static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static Meta MetaGet(string ddbPath, string key, string path = "")
+        public static string MetaGet(string ddbPath, string key, string path = null)
         {
             try
             {
-                if (_MetaGet(ddbPath, path, key, out var output) !=
+                if (_MetaGet(ddbPath, path ?? string.Empty, key, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                return JsonConvert.DeserializeObject<Meta>(json);
+
+                return json;
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -712,21 +734,31 @@ namespace DDB.Bindings
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
         }
-
+        
         [DllImport("ddb", EntryPoint = "DDBMetaUnset")]
-        static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
+        static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
+            [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static int MetaUnset(string ddbPath, string key, string path = "")
+        public static int MetaUnset(string ddbPath, string key, string path = null)
         {
             try
             {
-                if (_MetaUnset(ddbPath, path, key, out var output) !=
+                if (_MetaUnset(ddbPath, path ?? string.Empty, key, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                var def = new { Removed = 0 };
 
-                return JsonConvert.DeserializeAnonymousType(json, def).Removed;
+                if (json == null) 
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+
+                var obj = JsonConvert.DeserializeObject<JObject>(json);
+
+                if (obj == null || !obj.ContainsKey("removed"))
+                    throw new InvalidOperationException($"Expected 'removed' field but got '{json}'");
+
+                // ReSharper disable once PossibleNullReferenceException
+                return obj["removed"].ToObject<int>();
+
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -740,16 +772,21 @@ namespace DDB.Bindings
 
 
         [DllImport("ddb", EntryPoint = "DDBMetaList")]
-        static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
+        static extern DDBError _MetaList([MarshalAs(UnmanagedType.LPStr)] string ddbPath, 
+            [MarshalAs(UnmanagedType.LPStr)] string path, out IntPtr output);
 
-        public static List<MetaListItem> MetaList(string ddbPath, string path = "")
+        public static List<MetaListItem> MetaList(string ddbPath, string path = null)
         {
             try
             {
-                if (_MetaList(ddbPath, path, out var output) !=
+                if (_MetaList(ddbPath, path ?? string.Empty, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
+
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBMetaUnset call");
+
                 return JsonConvert.DeserializeObject<List<MetaListItem>>(json);
             }
             catch (EntryPointNotFoundException ex)
