@@ -731,7 +731,8 @@ namespace DDB.Tests
             FluentActions.Invoking(() => DroneDB.MetaGet(area.TestFolder, "abc", "123")).Should()
                 .Throw<DDBException>();
 
-            DroneDB.MetaGet(area.TestFolder, "abc").First().Data.Should().Be(true);
+            JsonConvert.DeserializeObject<Meta>(DroneDB.MetaGet(area.TestFolder, "abc")).Data
+                .Should().Be(true);
         }
 
         [Test]
@@ -744,7 +745,10 @@ namespace DDB.Tests
             DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\":false}");
             DroneDB.MetaAdd(area.TestFolder, "tests", "{\"test\":null}");
 
-            var res = DroneDB.MetaGet(area.TestFolder, "tests");
+            var res = JsonConvert.DeserializeObject<Meta[]>(DroneDB.MetaGet(area.TestFolder, "tests"));
+
+            res.Should().HaveCount(3);
+
         }
 
         [Test]

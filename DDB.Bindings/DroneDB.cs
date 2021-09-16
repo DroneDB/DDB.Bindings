@@ -714,7 +714,7 @@ namespace DDB.Bindings
         static extern DDBError _MetaGet([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
             [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
 
-        public static Meta[] MetaGet(string ddbPath, string key, string path = null)
+        public static string MetaGet(string ddbPath, string key, string path = null)
         {
             try
             {
@@ -722,7 +722,8 @@ namespace DDB.Bindings
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
-                return json == null ? null : JsonConvert.DeserializeObject<Meta[]>(json);
+
+                return json;
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -733,7 +734,7 @@ namespace DDB.Bindings
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
         }
-
+        
         [DllImport("ddb", EntryPoint = "DDBMetaUnset")]
         static extern DDBError _MetaUnset([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string path, 
             [MarshalAs(UnmanagedType.LPStr)] string key, out IntPtr output);
