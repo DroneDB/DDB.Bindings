@@ -350,6 +350,43 @@ namespace DDB.Bindings
 
         }
 
+        [DllImport("ddb", EntryPoint = "DDBVSIFree")]
+        static extern DDBError _DDBVSIFree(
+            IntPtr buffer);
+
+        [DllImport("ddb", EntryPoint = "DDBGenerateMemoryThumbnail")]
+        static extern DDBError _GenerateMemoryThumbnail(
+            [MarshalAs(UnmanagedType.LPStr)] string filePath, int size, out IntPtr outBuffer, out int outBufferSize);
+
+        public static byte[] GenerateThumbnail(string filePath, int size)
+        {
+
+            if (filePath == null)
+                throw new ArgumentException("filePath is null");
+
+            try
+            {
+                if (_GenerateMemoryThumbnail(filePath, size, out var outBuffer, out var outBufferSize) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var destBuf = new byte[outBufferSize];
+                Marshal.Copy(outBuffer, destBuf, 0, outBufferSize);
+
+                _DDBVSIFree(outBuffer);
+
+                return destBuf;
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
         [DllImport("ddb", EntryPoint = "DDBTile")]
         static extern DDBError _GenerateTile(
             [MarshalAs(UnmanagedType.LPStr)] string geotiffPath, int tz, int tx, int ty, out IntPtr outputTilePath, int tileSize, bool tms, bool forceRecreate);

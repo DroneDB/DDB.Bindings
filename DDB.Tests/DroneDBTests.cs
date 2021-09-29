@@ -451,6 +451,14 @@ namespace DDB.Tests
         }
 
         [Test]
+        public void GenerateMemoryThumbnail_HappyPath_Ok()
+        {
+            using var tempFile = new TempFile(TestFileUrl, BaseTestFolder);
+            var buffer = DroneDB.GenerateThumbnail(tempFile.FilePath, 300);
+            buffer.Length.Should().BeGreaterThan(0);
+        }
+
+        [Test]
         public void GenerateTile_HappyPath_Ok()
         {
 
