@@ -389,18 +389,18 @@ namespace DDB.Bindings
 
         [DllImport("ddb", EntryPoint = "DDBTile")]
         static extern DDBError _GenerateTile(
-            [MarshalAs(UnmanagedType.LPStr)] string geotiffPath, int tz, int tx, int ty, out IntPtr outputTilePath, int tileSize, bool tms, bool forceRecreate);
+            [MarshalAs(UnmanagedType.LPStr)] string inputPath, int tz, int tx, int ty, out IntPtr outputTilePath, int tileSize, bool tms, bool forceRecreate);
 
-        public static string GenerateTile(string filePath, int tz, int tx, int ty, int tileSize, bool tms, bool forceRecreate = false)
+        public static string GenerateTile(string inputPath, int tz, int tx, int ty, int tileSize, bool tms, bool forceRecreate = false)
         {
 
-            if (filePath == null)
-                throw new ArgumentException("filePath is null");
+            if (inputPath == null)
+                throw new ArgumentException("inputPath is null");
 
             try
             {
 
-                if (_GenerateTile(filePath, tz, tx, ty, out var output, tileSize, tms, forceRecreate) !=
+                if (_GenerateTile(inputPath, tz, tx, ty, out var output, tileSize, tms, forceRecreate) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var res = Marshal.PtrToStringAnsi(output);
@@ -409,6 +409,39 @@ namespace DDB.Bindings
                     throw new DDBException("Unable get tile path");
 
                 return res;
+
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
+            }
+
+        }
+
+        [DllImport("ddb", EntryPoint = "DDBMemoryTile")]
+        static extern DDBError _GenerateMemoryTile(
+            [MarshalAs(UnmanagedType.LPStr)] string inputPath, int tz, int tx, int ty, out IntPtr outBuffer, out int outBufferSize, int tileSize, bool tms, bool forceRecreate, [MarshalAs(UnmanagedType.LPStr)] string inputPathHash);
+        public static byte[] GenerateMemoryTile(string inputPath, int tz, int tx, int ty, int tileSize, bool tms, bool forceRecreate = false, string inputPathHash = "")
+        {
+            if (inputPath == null)
+                throw new ArgumentException("inputPath is null");
+
+            try
+            {
+                Console.WriteLine(inputPath);
+                if (_GenerateMemoryTile(inputPath, tz, tx, ty, out var outBuffer, out var outBufferSize, tileSize, tms, forceRecreate, inputPathHash) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var destBuf = new byte[outBufferSize];
+                Marshal.Copy(outBuffer, destBuf, 0, outBufferSize);
+
+                _DDBVSIFree(outBuffer);
+
+                return destBuf;
 
             }
             catch (EntryPointNotFoundException ex)
