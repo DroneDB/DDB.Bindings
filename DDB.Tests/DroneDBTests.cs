@@ -477,6 +477,15 @@ namespace DDB.Tests
         }
 
         [Test]
+        public void GenerateMemoryTile_HappyPath_Ok()
+        {
+            using var tempFile = new TempFile(TestGeoTiffUrl, BaseTestFolder);
+
+            var buffer = DroneDB.GenerateMemoryTile(tempFile.FilePath, 18, 64083, 92370, 256, true);
+            buffer.Length.Should().BeGreaterThan(0);
+        }
+
+        [Test]
         public void Tag_HappyPath_Ok()
         {
 
