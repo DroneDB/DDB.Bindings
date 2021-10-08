@@ -432,7 +432,6 @@ namespace DDB.Bindings
 
             try
             {
-                Console.WriteLine(inputPath);
                 if (_GenerateMemoryTile(inputPath, tz, tx, ty, out var outBuffer, out var outBufferSize, tileSize, tms, forceRecreate, inputPathHash) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
