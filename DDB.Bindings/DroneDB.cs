@@ -545,23 +545,29 @@ namespace DDB.Bindings
         }
 
         [DllImport("ddb", EntryPoint = "DDBDelta")]
-        private static extern DDBError _Delta([MarshalAs(UnmanagedType.LPStr)] string ddbSource,
-            [MarshalAs(UnmanagedType.LPStr)] string ddbTarget, out IntPtr output, [MarshalAs(UnmanagedType.LPStr)] string format);
+        private static extern DDBError _Delta([MarshalAs(UnmanagedType.LPStr)] string ddbSourceStamp,
+            [MarshalAs(UnmanagedType.LPStr)] string ddbTargetStamp, out IntPtr output, [MarshalAs(UnmanagedType.LPStr)] string format);
 
         public static Delta Delta(string ddbPath, string ddbTarget)
         {
+            return Delta(GetStamp(ddbPath), GetStamp(ddbTarget));
+        }
 
+
+        public static Delta Delta(Stamp source, Stamp target)
+        {
             try
             {
+                string sourceJson = JsonConvert.SerializeObject(source);
+                string targetJson = JsonConvert.SerializeObject(target);
 
-                if (_Delta(ddbPath, ddbTarget, out var output, "json") !=
+                if (_Delta(sourceJson, targetJson, out var output, "json") !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
                 var json = Marshal.PtrToStringAnsi(output);
 
                 if (string.IsNullOrWhiteSpace(json))
                     throw new DDBException("Unable get delta");
-
 
                 return JsonConvert.DeserializeObject<Delta>(json);
 

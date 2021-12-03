@@ -10,8 +10,10 @@ namespace DDB.Bindings.Model
 
     public class Stamp
     {
+        [JsonProperty("checksum")]
         public string Checksum { get; set; }
 
+        [JsonProperty("entries")]
         public List<Dictionary<string,string>> Entries { get; set; }
 
         
