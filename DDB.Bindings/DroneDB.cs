@@ -514,25 +514,25 @@ namespace DDB.Bindings
 
         }
 
-        [DllImport("ddb", EntryPoint = "DDBGetLastSync")]
-        static extern DDBError _GetLastSync([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string registry, out long lastSync);
+        [DllImport("ddb", EntryPoint = "DDBGetStamp")]
+        static extern DDBError _DDBGetStamp([MarshalAs(UnmanagedType.LPStr)] string ddbPath, out IntPtr output);
 
-        public static DateTime? GetLastSync(string ddbPath, string registry = null)
+        public static Stamp GetStamp(string ddbPath)
         {
-
             if (ddbPath == null)
                 throw new ArgumentException("DDB path is null");
 
             try
             {
-
-                if (_GetLastSync(ddbPath, registry, out var outLastSync) !=
+                if (_DDBGetStamp(ddbPath, out var output) !=
                     DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
 
-                if (outLastSync == 0) return null;
+                var json = Marshal.PtrToStringAnsi(output);
 
-                return Utils.UnixTimestampToDateTime(outLastSync);
+                if (json == null)
+                    throw new InvalidOperationException("No result from DDBGetStamp call");
 
+                return JsonConvert.DeserializeObject<Stamp>(json);
             }
             catch (EntryPointNotFoundException ex)
             {
@@ -542,36 +542,6 @@ namespace DDB.Bindings
             {
                 throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
             }
-
-        }
-
-        [DllImport("ddb", EntryPoint = "DDBSetLastSync")]
-        static extern DDBError _SetLastSync([MarshalAs(UnmanagedType.LPStr)] string ddbPath, [MarshalAs(UnmanagedType.LPStr)] string registry, long lastSync);
-
-        public static void SetLastSync(string ddbPath, string registry = null, DateTime? lastSync = null)
-        {
-
-            if (ddbPath == null)
-                throw new ArgumentException("DDB path is null");
-
-            try
-            {
-
-                var timestamp =
-                    lastSync == null ? 0 : ((DateTimeOffset)lastSync.Value).ToUnixTimeMilliseconds() / 1000;
-
-                if (_SetLastSync(ddbPath, registry, timestamp) !=
-                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
-            }
-            catch (EntryPointNotFoundException ex)
-            {
-                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new DDBException($"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details", ex);
-            }
-
         }
 
         [DllImport("ddb", EntryPoint = "DDBDelta")]

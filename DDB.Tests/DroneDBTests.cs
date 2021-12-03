@@ -544,33 +544,15 @@ namespace DDB.Tests
         }
 
         [Test]
-        public void Sync_HappyPath_Ok()
+        public void Stamp_HappyPath_Ok()
         {
-
-            const string registry = "test.com";
-            DateTime last = DateTime.Now.AddDays(-30);
-
             using var test = new TestFS(Test3ArchiveUrl, BaseTestFolder);
 
             var ddbPath = Path.Combine(test.TestFolder, DdbFolder);
 
-            var lastSync = DroneDB.GetLastSync(ddbPath);
-
-            lastSync.Should().BeNull();
-
-            DroneDB.SetLastSync(ddbPath);
-
-            lastSync = DroneDB.GetLastSync(ddbPath);
-
-            lastSync.Should().NotBeNull();
-            TestContext.WriteLine("LastSync = " + lastSync);
-
-            DroneDB.SetLastSync(ddbPath, registry, last);
-
-            lastSync = DroneDB.GetLastSync(ddbPath, registry);
-
-            lastSync.Should().BeCloseTo(last, TimeSpan.FromSeconds(1));
-
+            var stamp = DroneDB.GetStamp(ddbPath);
+            stamp.Checksum.Should().NotBeNull();
+            stamp.Entries.Count.Should().BeGreaterThan(0);
         }
 
         [Test]
