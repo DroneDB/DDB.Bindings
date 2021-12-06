@@ -554,6 +554,40 @@ namespace DDB.Bindings
         }
 
 
+        [DllImport("ddb", EntryPoint = "DDBApplyDelta")]
+        private static extern DDBError _ApplyDelta([MarshalAs(UnmanagedType.LPStr)] string delta,
+            [MarshalAs(UnmanagedType.LPStr)] string sourcePath, 
+            [MarshalAs(UnmanagedType.LPStr)] string ddbPath, int mergeStrategy, out IntPtr conflicts);
+
+        public static List<string> ApplyDelta(Delta delta, string sourcePath, string ddbPath, MergeStrategy mergeStrategy)
+        {
+            try
+            {
+                string deltaJson = JsonConvert.SerializeObject(delta);
+
+                if (_ApplyDelta(deltaJson, sourcePath, ddbPath, (int)mergeStrategy, out var conflictsPtr) !=
+                    DDBError.DDBERR_NONE) throw new DDBException(GetLastError());
+
+                var conflicts = Marshal.PtrToStringAnsi(conflictsPtr);
+
+                if (string.IsNullOrWhiteSpace(conflicts))
+                    throw new DDBException("Unable get applydelta result");
+
+                return JsonConvert.DeserializeObject<List<string>>(conflicts);
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                throw new DDBException($"Error in calling ddb lib: incompatible versions ({ex.Message})", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DDBException(
+                    $"Error in calling ddb lib. Last error: \"{GetLastError()}\", check inner exception for details",
+                    ex);
+            }
+        }
+
+
         public static Delta Delta(Stamp source, Stamp target)
         {
             try
